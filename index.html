@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HOota AI | محمود عبدالله</title>
+    <title>HOota AI | التحديث الاحترافي</title>
     
-    <!-- React & Dependencies -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -13,61 +12,74 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
         
         :root {
             --primary: #8b5cf6;
-            --secondary: #6366f1;
-            --bg-dark: #050508;
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --bg-dark: #050507;
+            --card-dark: rgba(20, 20, 25, 0.7);
         }
 
         body { 
-            font-family: 'Noto Sans Arabic', sans-serif; 
+            font-family: 'Noto Sans Arabic', 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-dark);
             color: #f8fafc;
             margin: 0;
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
+            overflow: hidden;
+            transition: background 0.3s ease;
         }
 
-        .glass-panel {
-            background: rgba(15, 15, 25, 0.7);
-            backdrop-filter: blur(12px);
+        .glass {
+            background: var(--card-dark);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
 
-        .chat-bubble-user {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 1.25rem 1.25rem 0 1.25rem;
+        .premium-border {
+            border: 1px solid transparent;
+            background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
+                        linear-gradient(135deg, var(--primary), #3b82f6) border-box;
         }
 
-        .chat-bubble-ai {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1.25rem 1.25rem 1.25rem 0;
+        .chat-scroll::-webkit-scrollbar { width: 4px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .ai-message {
+            animation: slideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
 
-        .nav-item {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .nav-active {
-            color: var(--primary);
-            transform: translateY(-4px);
+        /* ⚡️ Spinning Zap Animation */
+        .zap-spin {
+            animation: zap-rotate 1.5s linear infinite;
+            display: inline-block;
+            filter: drop-shadow(0 0 8px var(--primary));
         }
 
-        .animate-slide-up {
-            animation: slideUp 0.4s ease-out forwards;
+        @keyframes zap-rotate {
+            from { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.3); }
+            to { transform: rotate(360deg) scale(1); }
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .gradient-text {
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* Hide scrollbar but keep functionality */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body.light-mode {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            --card-dark: rgba(255, 255, 255, 0.8);
+            --bg-dark: #f1f5f9;
+        }
     </style>
 </head>
 <body>
@@ -77,200 +89,202 @@
         const { useState, useEffect, useRef } = React;
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState('dashboard');
-            const [messages, setMessages] = useState([
-                { id: 1, role: 'ai', text: 'أهلاً بك! أنا HOota AI، كيف يمكنني مساعدتك اليوم؟' }
-            ]);
-            const [inputValue, setInputValue] = useState('');
-            const [isTyping, setIsTyping] = useState(false);
+            const [query, setQuery] = useState('');
+            const [messages, setMessages] = useState([]);
+            const [isLoading, setIsLoading] = useState(false);
+            const [activeTab, setActiveTab] = useState('home');
+            const [isDarkMode, setIsDarkMode] = useState(true);
             const chatEndRef = useRef(null);
-
-            const scrollToBottom = () => {
-                chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-            };
+            
+            const apiKey = ""; 
 
             useEffect(() => {
-                scrollToBottom();
+                chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
                 lucide.createIcons();
-            }, [messages, activeTab]);
+            }, [messages, isLoading, activeTab]);
 
-            const handleSend = () => {
-                if (!inputValue.trim()) return;
+            const toggleDarkMode = () => {
+                setIsDarkMode(!isDarkMode);
+                document.body.classList.toggle('light-mode');
+            };
+
+            const callGemini = async (prompt) => {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
                 
-                const newUserMsg = { id: Date.now(), role: 'user', text: inputValue };
-                setMessages(prev => [...prev, newUserMsg]);
-                setInputValue('');
-                setIsTyping(true);
-
-                // Simulation of AI Response
-                setTimeout(() => {
-                    const aiResponse = { 
-                        id: Date.now() + 1, 
-                        role: 'ai', 
-                        text: `أنا نسخة تجريبية حالياً، محمود عبدالله يعمل على ربطي بمحركات البحث الذكية قريباً! هل لديك أي استفسار آخر؟` 
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            tools: [{ "google_search": {} }],
+                            systemInstruction: { parts: [{ text: "أنت HOota AI من تطوير محمود عبدالله. كن ذكياً وسريعاً جداً." }] }
+                        })
+                    });
+                    const data = await response.json();
+                    return {
+                        text: data.candidates?.[0]?.content?.parts?.[0]?.text,
+                        sources: data.candidates?.[0]?.groundingMetadata?.groundingAttributions || []
                     };
-                    setMessages(prev => [...prev, aiResponse]);
-                    setIsTyping(false);
-                }, 1500);
+                } catch (e) {
+                    return { text: "فشل الاتصال." };
+                }
+            };
+
+            const handleSend = async (customText = null) => {
+                const textToSend = customText || query;
+                if (!textToSend.trim() || isLoading) return;
+
+                setQuery('');
+                setMessages(prev => [...prev, { role: 'user', text: textToSend }]);
+                setIsLoading(true);
+                if(activeTab !== 'chat') setActiveTab('chat');
+
+                const res = await callGemini(textToSend);
+                setMessages(prev => [...prev, { role: 'ai', text: res.text, sources: res.sources }]);
+                setIsLoading(false);
             };
 
             return (
                 <div className="flex flex-col h-screen max-h-screen overflow-hidden">
                     {/* Header */}
-                    <header className="px-6 py-4 flex justify-between items-center glass-panel z-50">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                                <i data-lucide="cpu" className="w-5 h-5 text-white"></i>
+                    <header className="px-6 py-4 glass border-b flex justify-between items-center z-50">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                                <i data-lucide="zap" className="text-white w-5 h-5"></i>
                             </div>
-                            <span className="font-black text-lg tracking-tight gradient-text">HOota AI</span>
+                            <div>
+                                <h1 className="text-xl font-black tracking-tighter italic">HOota AI</h1>
+                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Mahmoud Abdullah</p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold border border-white/10 px-2 py-0.5 rounded">Stable v1.2</span>
-                        </div>
+                        <button onClick={toggleDarkMode} className="p-2.5 rounded-full glass hover:bg-white/10 transition-all">
+                            <i data-lucide={isDarkMode ? "sun" : "moon"} className="w-5 h-5 text-purple-400"></i>
+                        </button>
                     </header>
 
                     {/* Main Content Area */}
-                    <main className="flex-1 overflow-y-auto no-scrollbar relative">
-                        {/* Background Decor */}
-                        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-                            <div className="absolute top-1/4 -right-20 w-80 h-80 bg-purple-600/10 blur-[100px] rounded-full"></div>
-                            <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-blue-600/10 blur-[100px] rounded-full"></div>
-                        </div>
-
-                        <div className="max-w-3xl mx-auto px-4 py-6 h-full">
-                            {activeTab === 'dashboard' && (
-                                <div className="space-y-6 animate-slide-up">
-                                    <div className="glass-panel p-8 rounded-[2.5rem] text-center border-purple-500/20">
-                                        <h1 className="text-4xl font-black mb-2 italic">مرحباً بك!</h1>
-                                        <p className="text-slate-400">نظام التشغيل الذكي الخاص بك جاهز</p>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="glass-panel p-5 rounded-3xl space-y-3">
-                                            <i data-lucide="zap" className="text-yellow-400 w-5 h-5"></i>
-                                            <p className="text-sm font-bold text-slate-300">السرعة</p>
-                                            <p className="text-xs text-slate-500">استجابة فائقة</p>
-                                        </div>
-                                        <div className="glass-panel p-5 rounded-3xl space-y-3">
-                                            <i data-lucide="shield-check" className="text-green-400 w-5 h-5"></i>
-                                            <p className="text-sm font-bold text-slate-300">الأمان</p>
-                                            <p className="text-xs text-slate-500">خصوصية تامة</p>
-                                        </div>
-                                    </div>
+                    <main className="flex-1 overflow-y-auto chat-scroll p-4 md:p-8 space-y-6 pb-32">
+                        {activeTab === 'home' && (
+                            <div className="max-w-4xl mx-auto space-y-12 py-10 animate-slideIn">
+                                <div className="text-center space-y-4">
+                                    <h2 className="text-5xl font-black tracking-tight leading-tight">مرحباً بك في <br/><span className="gradient-text">عالم الذكاء الفائق</span></h2>
+                                    <p className="text-slate-400 max-w-lg mx-auto">الواجهة الأسرع للبحث والدردشة الذكية، تم تطويرها بواسطة محمود عبدالله.</p>
                                 </div>
-                            )}
-
-                            {activeTab === 'ai' && (
-                                <div className="flex flex-col h-full animate-slide-up">
-                                    <div className="flex-1 space-y-4 mb-20 overflow-y-auto no-scrollbar">
-                                        {messages.map((m) => (
-                                            <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-start' : 'justify-end'}`}>
-                                                <div className={`max-w-[85%] p-4 shadow-xl ${m.role === 'user' ? 'chat-bubble-user text-white' : 'chat-bubble-ai text-slate-200'}`}>
-                                                    <p className="text-sm leading-relaxed">{m.text}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {isTyping && (
-                                            <div className="flex justify-end">
-                                                <div className="chat-bubble-ai p-4 flex gap-1">
-                                                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
-                                                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                                                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                                                </div>
-                                            </div>
-                                        )}
-                                        <div ref={chatEndRef} />
-                                    </div>
-                                    
-                                    {/* Chat Input Fixed above nav */}
-                                    <div className="fixed bottom-24 left-4 right-4 max-w-3xl mx-auto">
-                                        <div className="glass-panel p-2 rounded-2xl flex gap-2 items-center shadow-2xl border-white/20">
-                                            <input 
-                                                type="text" 
-                                                value={inputValue}
-                                                onChange={(e) => setInputValue(e.target.value)}
-                                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                                placeholder="اكتب رسالتك هنا..."
-                                                className="flex-1 bg-transparent border-none outline-none px-4 py-2 text-sm"
-                                            />
-                                            <button 
-                                                onClick={handleSend}
-                                                className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center hover:bg-purple-500 transition-colors"
-                                            >
-                                                <i data-lucide="send-horizontal" className="w-5 h-5 text-white"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === 'about' && (
-                                <div className="animate-slide-up space-y-6">
-                                    <div className="glass-panel p-8 rounded-[2.5rem] border-t-4 border-purple-600 relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                                            <i data-lucide="quote" className="w-20 h-20"></i>
-                                        </div>
-                                        <div className="flex flex-col items-center gap-4 text-center">
-                                            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-500 to-indigo-600 p-1">
-                                                <div className="w-full h-full rounded-[1.4rem] bg-[#050508] flex items-center justify-center">
-                                                    <i data-lucide="user" className="w-10 h-10 text-slate-600"></i>
-                                                </div>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                        { icon: 'message-circle', title: 'ابدأ محادثة جديدة', desc: 'اسأل عن أي شيء يخطر ببالك', action: () => setActiveTab('chat') },
+                                        { icon: 'trending-up', title: 'أخبار التقنية', desc: 'ما الجديد في عالم الذكاء الاصطناعي؟', action: () => handleSend("ما هي أحدث أخبار الذكاء الاصطناعي اليوم؟") },
+                                        { icon: 'code-2', title: 'مساعد الأكواد', desc: 'حل المشاكل البرمجية فوراً', action: () => handleSend("ساعدني في كتابة كود React بسيط") },
+                                        { icon: 'globe', title: 'البحث العالمي', desc: 'نتائج من محركات البحث مباشرة', action: () => handleSend("ما هو ترتيب الدول في جودة التعليم 2024؟") }
+                                    ].map((box, i) => (
+                                        <div key={i} onClick={box.action} className="glass p-6 rounded-[2.5rem] flex items-center gap-4 border-transparent hover:border-purple-500/40 transition-all cursor-pointer group shadow-xl">
+                                            <div className="p-4 bg-purple-500/10 rounded-2xl text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-all">
+                                                <i data-lucide={box.icon}></i>
                                             </div>
                                             <div>
-                                                <h2 className="text-2xl font-bold">محمود عبدالله</h2>
-                                                <p className="text-purple-400 text-sm font-medium">مؤسس ومطور HOota AI</p>
+                                                <h3 className="font-bold">{box.title}</h3>
+                                                <p className="text-[11px] text-slate-500">{box.desc}</p>
                                             </div>
-                                            <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
-                                                أنا محمود عبدالله، قمت ببناء HOota AI ليكون بوابتكم نحو مستقبل أكثر ذكاءً. هدفي هو دمج أحدث تقنيات الذكاء الاصطناعي في أدوات يومية بسيطة وسهلة المنال للجميع.
-                                            </p>
                                         </div>
-                                    </div>
-                                    
-                                    <div className="flex gap-3 justify-center">
-                                        <div className="p-4 glass-panel rounded-2xl flex-1 text-center group hover:border-purple-500/50 transition-all cursor-pointer">
-                                            <i data-lucide="mail" className="w-5 h-5 mx-auto mb-2 text-slate-400 group-hover:text-purple-400"></i>
-                                            <span className="text-[10px] block text-slate-500">تواصل معي</span>
-                                        </div>
-                                        <div className="p-4 glass-panel rounded-2xl flex-1 text-center group hover:border-purple-500/50 transition-all cursor-pointer">
-                                            <i data-lucide="share-2" className="w-5 h-5 mx-auto mb-2 text-slate-400 group-hover:text-purple-400"></i>
-                                            <span className="text-[10px] block text-slate-500">مشاركة</span>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'about' && (
+                            <div className="max-w-2xl mx-auto animate-slideIn py-10">
+                                <div className="glass p-10 rounded-[3rem] text-center space-y-6 border-purple-500/20">
+                                    <div className="w-24 h-24 mx-auto rounded-[2rem] bg-gradient-to-tr from-purple-600 to-blue-500 p-1">
+                                        <div className="w-full h-full bg-[#050507] rounded-[1.8rem] flex items-center justify-center">
+                                            <i data-lucide="crown" className="w-10 h-10 text-purple-500"></i>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h2 className="text-3xl font-black">محمود عبدالله</h2>
+                                        <p className="text-purple-400 font-bold text-xs tracking-[0.3em] uppercase">The Architect</p>
+                                    </div>
+                                    <p className="text-slate-400 text-sm leading-relaxed px-4">
+                                        مطور ومبرمج شغوف ببناء أدوات ذكية تسهل حياة الناس. HOota AI هو أحد المشاريع التي تهدف لدمج التكنولوجيا والذكاء الاصطناعي في واجهة واحدة بسيطة وقوية.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'chat' && (
+                            <div className="max-w-4xl mx-auto space-y-6">
+                                {messages.length === 0 && (
+                                    <div className="text-center py-20 opacity-30">
+                                        <i data-lucide="ghost" className="w-16 h-16 mx-auto mb-4"></i>
+                                        <p>المحادثة فارغة.. اسأل شيئاً الآن!</p>
+                                    </div>
+                                )}
+                                {messages.map((m, i) => (
+                                    <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} ai-message`}>
+                                        <div className={`max-w-[85%] p-5 rounded-[2rem] text-sm ${
+                                            m.role === 'user' 
+                                            ? 'bg-purple-600 text-white rounded-br-none shadow-lg shadow-purple-900/20' 
+                                            : 'glass border-white/10 rounded-bl-none shadow-2xl'
+                                        }`}>
+                                            <div className="leading-relaxed whitespace-pre-wrap">{m.text}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {isLoading && (
+                                    <div className="flex justify-start ai-message">
+                                        <div className="glass p-4 rounded-[2rem] rounded-bl-none flex items-center gap-3">
+                                            <span className="zap-spin text-xl">⚡️</span>
+                                            <span className="text-[10px] text-purple-400 font-black uppercase tracking-widest">HOota يفكر الآن...</span>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={chatEndRef} />
+                            </div>
+                        )}
                     </main>
 
-                    {/* Bottom Navigation */}
-                    <nav className="glass-panel border-t border-white/5 px-6 py-4 pb-8 md:pb-6 z-50">
-                        <div className="max-w-md mx-auto flex justify-around items-center">
-                            <button 
-                                onClick={() => setActiveTab('dashboard')}
-                                className={`nav-item flex flex-col items-center gap-1 ${activeTab === 'dashboard' ? 'nav-active' : 'text-slate-500'}`}
-                            >
-                                <i data-lucide="home" className="w-6 h-6"></i>
-                                <span className="text-[10px] font-bold">الرئيسية</span>
-                            </button>
+                    {/* Navigation & Conditional Input */}
+                    <div className="fixed bottom-0 left-0 right-0 z-50 p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
+                        <div className="max-w-3xl mx-auto space-y-4">
                             
-                            <button 
-                                onClick={() => setActiveTab('ai')}
-                                className={`nav-item flex flex-col items-center gap-1 ${activeTab === 'ai' ? 'nav-active' : 'text-slate-500'}`}
-                            >
-                                <div className={`p-3 rounded-2xl -mt-8 shadow-2xl transition-all ${activeTab === 'ai' ? 'bg-purple-600 text-white scale-110 shadow-purple-500/40' : 'bg-slate-800 text-slate-400'}`}>
-                                    <i data-lucide="message-circle" className="w-6 h-6"></i>
+                            {/* Input only visible in Chat Tab */}
+                            {activeTab === 'chat' && (
+                                <div className="glass p-2 rounded-full flex items-center gap-2 premium-border shadow-2xl animate-slideIn">
+                                    <input 
+                                        className="flex-1 bg-transparent border-none outline-none px-6 py-3 text-sm placeholder:text-slate-600"
+                                        placeholder="اكتب سؤالك هنا يا محمود..."
+                                        value={query}
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                    />
+                                    <button 
+                                        onClick={() => handleSend()}
+                                        disabled={isLoading || !query.trim()}
+                                        className="bg-purple-600 text-white w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg disabled:opacity-50"
+                                    >
+                                        <i data-lucide="arrow-up" className="w-5 h-5"></i>
+                                    </button>
                                 </div>
-                                <span className="text-[10px] font-bold">الذكاء</span>
-                            </button>
-                            
-                            <button 
-                                onClick={() => setActiveTab('about')}
-                                className={`nav-item flex flex-col items-center gap-1 ${activeTab === 'about' ? 'nav-active' : 'text-slate-500'}`}
-                            >
-                                <i data-lucide="fingerprint" className="w-6 h-6"></i>
-                                <span className="text-[10px] font-bold">المطور</span>
-                            </button>
+                            )}
+
+                            {/* Bottom Nav Tabs */}
+                            <div className="flex justify-center items-center gap-12 pt-2">
+                                <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'home' ? 'text-purple-400 scale-110' : 'text-slate-500 hover:text-white'}`}>
+                                    <i data-lucide="layout-grid" className="w-6 h-6"></i>
+                                    <span className="text-[9px] font-bold">الرئيسية</span>
+                                </button>
+                                <button onClick={() => setActiveTab('chat')} className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'chat' ? 'text-purple-400 scale-110' : 'text-slate-500 hover:text-white'}`}>
+                                    <i data-lucide="sparkles" className="w-6 h-6"></i>
+                                    <span className="text-[9px] font-bold">المحادثة</span>
+                                </button>
+                                <button onClick={() => setActiveTab('about')} className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'about' ? 'text-purple-400 scale-110' : 'text-slate-500 hover:text-white'}`}>
+                                    <i data-lucide="crown" className="w-6 h-6"></i>
+                                    <span className="text-[9px] font-bold">المطور</span>
+                                </button>
+                            </div>
                         </div>
-                    </nav>
+                    </div>
                 </div>
             );
         };
