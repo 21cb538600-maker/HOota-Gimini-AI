@@ -1,1 +1,0 @@
-# HOota-Gimini-AI
