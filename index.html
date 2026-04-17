@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HOota AI | المحرك المستقر</title>
+    <title>HOota AI | السرعة القصوى</title>
     
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -12,56 +12,95 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&family=Noto+Sans+Arabic:wght@300;500;700;900&display=swap');
         
         :root {
-            --primary: #8b5cf6;
-            --bg-dark: #050507;
-            --card-dark: rgba(18, 18, 22, 0.85);
+            --accent: #a855f7;
+            --accent-glow: rgba(168, 85, 247, 0.4);
+            --bg: #030305;
+            --panel: rgba(15, 15, 20, 0.85);
         }
 
         body { 
-            font-family: 'Noto Sans Arabic', sans-serif; 
-            background-color: var(--bg-dark);
-            color: #f1f5f9;
+            font-family: 'Noto Sans Arabic', 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg);
+            color: #ffffff;
             margin: 0;
             overflow: hidden;
+            height: 100vh;
         }
 
-        .glass {
-            background: var(--card-dark);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .glass-panel {
+            background: var(--panel);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .zap-spinner {
-            display: inline-block;
-            animation: zap-spin 0.8s linear infinite;
-            filter: drop-shadow(0 0 12px #8b5cf6);
-            transform-origin: center;
-            font-size: 1.4rem;
+        /* ⚡️ أيقونة المعالجة السريعة */
+        .loading-orbit {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        @keyframes zap-spin {
+        .loading-orbit::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: var(--accent);
+            animation: spin 0.6s linear infinite; /* تسريع الدوران */
+        }
+
+        .loading-zap {
+            animation: pulse-glow 1s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px var(--accent));
+            color: var(--accent);
+        }
+
+        @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        .chat-scroll::-webkit-scrollbar { width: 3px; }
-        .chat-scroll::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 10px; }
-
-        .msg-anim {
-            animation: fadeInUp 0.3s ease-out forwards;
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
 
-        @keyframes fadeInUp {
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 40%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .msg-appear {
+            animation: msgUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes msgUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .input-glow:focus-within {
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
-            border-color: rgba(139, 92, 246, 0.5);
+        .custom-scroll::-webkit-scrollbar { width: 0px; }
+        
+        .nav-link { transition: all 0.3s ease; cursor: pointer; }
+        .nav-link.active { color: var(--accent); transform: translateY(-2px); }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        @media (min-width: 1024px) {
+            .container-fixed { max-width: 850px; margin: 0 auto; }
         }
     </style>
 </head>
@@ -71,21 +110,23 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
+        // ملاحظة: يتم جلب الـ API Key من البيئة المحيطة تلقائياً
+        const apiKey = ""; 
+
         const App = () => {
             const [query, setQuery] = useState('');
             const [messages, setMessages] = useState([]);
             const [isLoading, setIsLoading] = useState(false);
             const [activeTab, setActiveTab] = useState('home');
             const chatEndRef = useRef(null);
-            
-            const apiKey = ""; // سيتم تفعيله تلقائياً
 
             useEffect(() => {
                 chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
                 if (window.lucide) window.lucide.createIcons();
             }, [messages, isLoading, activeTab]);
 
-            const callAI = async (text) => {
+            const requestAI = async (prompt) => {
+                // استخدام نموذج Flash المطور للسرعة القصوى
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
                 
                 try {
@@ -93,171 +134,167 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            contents: [{ parts: [{ text }] }],
-                            systemInstruction: { parts: [{ text: "أنت HOota AI، مساعد ذكي سريع جداً من تطوير محمود عبدالله. إجاباتك موجزة ومفيدة." }] }
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: "أنت HOota AI. مطورك هو محمود عبدالله. إجاباتك فورية، مختصرة، وذكية جداً." }] },
+                            generationConfig: {
+                                temperature: 0.7,
+                                maxOutputTokens: 1000,
+                            }
                         })
                     });
 
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error?.message || "Error");
-                    }
-
+                    if (!response.ok) throw new Error("Speed limit or Key issue");
                     const data = await response.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "نعتذر، لم يتم العثور على رد.";
-                } catch (e) {
-                    console.error("AI Error:", e);
-                    return "حدث خطأ في الاتصال. يرجى التأكد من مفتاح الـ API أو المحاولة لاحقاً.";
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (err) {
+                    return "عذراً، حدث تأخير غير متوقع. جرب مرة أخرى يا محمود.";
                 }
             };
 
-            const handleSend = async (forcedText = null) => {
-                const finalQuery = forcedText || query;
-                if (!finalQuery.trim() || isLoading) return;
+            const handleSendMessage = async (text = null) => {
+                const content = text || query;
+                if (!content.trim() || isLoading) return;
 
                 setQuery('');
-                setMessages(prev => [...prev, { role: 'user', text: finalQuery }]);
+                setMessages(prev => [...prev, { role: 'user', text: content }]);
                 setIsLoading(true);
                 if (activeTab !== 'chat') setActiveTab('chat');
 
-                const aiResponse = await callAI(finalQuery);
-                setMessages(prev => [...prev, { role: 'ai', text: aiResponse }]);
+                const response = await requestAI(content);
+                setMessages(prev => [...prev, { role: 'ai', text: response }]);
                 setIsLoading(false);
             };
 
             return (
-                <div className="flex flex-col h-screen max-h-screen">
+                <div className="flex flex-col h-screen overflow-hidden bg-[#030305]">
+                    
                     {/* Header */}
-                    <header className="px-6 py-4 glass border-b border-white/5 flex justify-between items-center z-50">
+                    <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center glass-panel border-b-0 rounded-b-[1.5rem] mx-2 mt-2">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center shadow-lg">
                                 <i data-lucide="zap" className="text-white w-5 h-5"></i>
                             </div>
                             <div>
-                                <h1 className="text-xl font-black italic tracking-tighter">HOota AI</h1>
-                                <p className="text-[10px] text-slate-500 font-bold uppercase">Mahmoud Abdullah</p>
+                                <h1 className="text-lg font-black tracking-tighter text-gradient leading-none">HOota AI</h1>
+                                <p className="text-[8px] font-bold text-slate-500 tracking-[0.2em] uppercase mt-1">Turbo Engine</p>
                             </div>
                         </div>
-                        <div className="text-[10px] font-mono text-green-500 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                            ACTIVE ENGINE
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+                            <span className="text-[9px] text-slate-400 font-bold uppercase">Ready</span>
                         </div>
                     </header>
 
-                    {/* Body */}
-                    <main className="flex-1 overflow-y-auto chat-scroll p-4 md:p-8 pb-40">
-                        {activeTab === 'home' && (
-                            <div className="max-w-4xl mx-auto py-16 text-center space-y-12">
-                                <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-tight">
-                                    أهلاً <span className="text-purple-500">محمود</span>!<br/> كيف يمكنني مساعدتك؟
-                                </h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {[
-                                        { t: "أحدث التقنيات", i: "cpu", c: "ما هي أحدث تطورات الذكاء الاصطناعي اليوم؟" },
-                                        { t: "تحليل كود", i: "code-2", c: "اشرح لي كود بايثون بسيط لتوقع الطقس" },
-                                        { t: "أفكار مشاريع", i: "lightbulb", c: "أعطني فكرة مشروع برمجي مبتكر لعام 2024" },
-                                        { t: "دردشة سريعة", i: "zap", c: "من هو محمود عبدالله مطور HOota AI؟" }
-                                    ].map((item, idx) => (
-                                        <button 
-                                            key={idx}
-                                            onClick={() => handleSend(item.c)}
-                                            className="glass p-6 rounded-[2.5rem] flex items-center gap-4 hover:border-purple-500/50 transition-all text-right group"
-                                        >
-                                            <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center group-hover:bg-purple-600 transition-colors">
-                                                <i data-lucide={item.i} className="w-5 h-5 text-purple-500 group-hover:text-white"></i>
+                    {/* Main Container */}
+                    <main className="flex-1 overflow-y-auto custom-scroll pt-28 pb-44 px-4">
+                        <div className="container-fixed">
+                            {activeTab === 'home' && (
+                                <div className="py-10 space-y-10 animate-fadeIn">
+                                    <div className="text-center space-y-2">
+                                        <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-tight">
+                                            السرعة <span className="text-gradient">القصوى</span>
+                                        </h2>
+                                        <p className="text-slate-400 text-sm md:text-lg font-light">مرحبًا بك يا محمود في النسخة المطورة والأسرع.</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {[
+                                            { t: "بحث سريع", i: "search", d: "ما هي أسرع لغات البرمجة حالياً؟" },
+                                            { t: "تحليل ذكي", i: "brain-circuit", d: "لخص لي أهم فوائد الذكاء الاصطناعي" }
+                                        ].map((card, idx) => (
+                                            <button 
+                                                key={idx}
+                                                onClick={() => handleSendMessage(card.d)}
+                                                className="glass-panel p-6 rounded-[2rem] flex items-center gap-5 group hover:border-purple-500/50 transition-all text-right"
+                                            >
+                                                <div className="w-12 h-12 rounded-xl bg-purple-600/10 flex items-center justify-center group-hover:bg-purple-600 transition-all">
+                                                    <i data-lucide={card.i} className="text-purple-500 group-hover:text-white w-5 h-5"></i>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="text-base font-bold text-white">{card.t}</h3>
+                                                    <p className="text-[10px] text-slate-500 truncate">{card.d}</p>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'chat' && (
+                                <div className="space-y-6 max-w-2xl mx-auto">
+                                    {messages.map((m, i) => (
+                                        <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} msg-appear`}>
+                                            <div className={`max-w-[85%] p-5 rounded-[1.8rem] text-[14px] leading-relaxed ${
+                                                m.role === 'user' 
+                                                ? 'bg-purple-600 text-white rounded-br-none' 
+                                                : 'glass-panel border-white/5 rounded-bl-none text-slate-200'
+                                            }`}>
+                                                <div className="whitespace-pre-wrap">{m.text}</div>
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-sm">{item.t}</h3>
-                                                <p className="text-[10px] text-slate-500">اضغط للاستفسار فوراً</p>
-                                            </div>
-                                        </button>
+                                        </div>
                                     ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'chat' && (
-                            <div className="max-w-4xl mx-auto space-y-6">
-                                {messages.length === 0 && (
-                                    <div className="text-center py-20 opacity-20">
-                                        <i data-lucide="message-circle" className="w-16 h-16 mx-auto mb-4"></i>
-                                        <p>ابدأ المحادثة الآن..</p>
-                                    </div>
-                                )}
-                                {messages.map((m, i) => (
-                                    <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} msg-anim`}>
-                                        <div className={`max-w-[85%] p-4 rounded-[1.8rem] text-[14px] leading-relaxed shadow-sm ${
-                                            m.role === 'user' ? 'bg-purple-600 text-white rounded-br-none' : 'glass border-white/5 rounded-bl-none'
-                                        }`}>
-                                            {m.text}
+                                    {isLoading && (
+                                        <div className="flex justify-center py-6 msg-appear">
+                                            <div className="loading-orbit">
+                                                <i data-lucide="zap" className="w-5 h-5 loading-zap"></i>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                                {isLoading && (
-                                    <div className="flex justify-start msg-anim">
-                                        <div className="glass p-4 rounded-[1.8rem] rounded-bl-none flex items-center gap-4">
-                                            <span className="zap-spinner">⚡️</span>
-                                            <span className="text-[11px] font-bold text-purple-400 tracking-tighter uppercase">HOota يعمل الآن...</span>
-                                        </div>
-                                    </div>
-                                )}
-                                <div ref={chatEndRef} />
-                            </div>
-                        )}
-
-                        {activeTab === 'about' && (
-                            <div className="max-w-xl mx-auto py-12">
-                                <div className="glass p-10 rounded-[3rem] text-center space-y-6 border-purple-500/20">
-                                    <div className="w-20 h-20 bg-purple-600 rounded-3xl mx-auto flex items-center justify-center shadow-xl">
-                                        <i data-lucide="crown" className="w-10 h-10 text-white"></i>
-                                    </div>
-                                    <h2 className="text-3xl font-black tracking-tight">محمود عبدالله</h2>
-                                    <p className="text-slate-400 text-sm leading-relaxed">
-                                        المطور الرئيسي لمحرك HOota AI. تم تصميم هذا النظام ليكون تجربة ذكاء اصطناعي فريدة تمزج بين السرعة العالية والتصميم العصري.
-                                    </p>
+                                    )}
+                                    <div ref={chatEndRef} />
                                 </div>
-                            </div>
-                        )}
+                            )}
+
+                            {activeTab === 'about' && (
+                                <div className="py-12 animate-fadeIn text-center space-y-6">
+                                    <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-tr from-purple-600 to-blue-500 mx-auto flex items-center justify-center shadow-xl">
+                                        <i data-lucide="shield-check" className="w-10 h-10 text-white"></i>
+                                    </div>
+                                    <h2 className="text-2xl font-black text-white">محمود عبدالله</h2>
+                                    <p className="text-slate-500 text-sm max-w-xs mx-auto">مطور الأنظمة الذكية وفائقة السرعة.</p>
+                                </div>
+                            )}
+                        </div>
                     </main>
 
-                    {/* Fixed Navigation & Input */}
-                    <div className="fixed bottom-0 left-0 right-0 p-6 z-50 bg-gradient-to-t from-black via-black/90 to-transparent">
-                        <div className="max-w-3xl mx-auto flex flex-col gap-4">
+                    {/* Bottom Nav */}
+                    <footer className="fixed bottom-0 left-0 right-0 z-[100] px-4 pb-8 pt-4 bg-gradient-to-t from-black via-black/90 to-transparent">
+                        <div className="container-fixed flex flex-col gap-4">
+                            
                             {activeTab === 'chat' && (
-                                <div className="glass p-1.5 rounded-full flex items-center gap-2 input-glow border-white/10 transition-all">
+                                <div className="glass-panel p-1.5 rounded-full flex items-center gap-2 border-white/10 input-wrapper">
                                     <input 
-                                        className="flex-1 bg-transparent border-none outline-none px-6 py-2.5 text-sm placeholder:text-slate-600"
-                                        placeholder="اكتب رسالتك يا محمود..."
+                                        className="flex-1 bg-transparent border-none outline-none px-5 py-3 text-sm text-white placeholder:text-slate-600"
+                                        placeholder="اسأل HOota بسرعة..."
                                         value={query}
                                         onChange={(e) => setQuery(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                                     />
                                     <button 
-                                        onClick={() => handleSend()}
+                                        onClick={() => handleSendMessage()}
                                         disabled={isLoading || !query.trim()}
-                                        className="w-11 h-11 rounded-full bg-purple-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:grayscale shadow-lg shadow-purple-500/20"
+                                        className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center hover:scale-105 transition-all disabled:opacity-20 shadow-lg"
                                     >
-                                        <i data-lucide="arrow-up" className="w-5 h-5 text-white"></i>
+                                        <i data-lucide="send" className="w-5 h-5 text-white"></i>
                                     </button>
                                 </div>
                             )}
 
-                            <nav className="flex justify-center gap-12 items-center py-2">
-                                <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'home' ? 'text-purple-400 scale-110' : 'text-slate-500'}`}>
-                                    <i data-lucide="layout-grid" className="w-6 h-6"></i>
-                                    <span className="text-[9px] font-bold">الرئيسية</span>
+                            <nav className="glass-panel py-3 px-10 rounded-full flex justify-between items-center mx-auto w-full max-w-[400px]">
+                                <button onClick={() => setActiveTab('home')} className={`nav-link flex flex-col items-center gap-0.5 ${activeTab === 'home' ? 'active' : 'text-slate-500'}`}>
+                                    <i data-lucide="home" className="w-5 h-5"></i>
+                                    <span className="text-[8px] font-bold uppercase tracking-widest">البداية</span>
                                 </button>
-                                <button onClick={() => setActiveTab('chat')} className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'chat' ? 'text-purple-400 scale-110' : 'text-slate-500'}`}>
-                                    <i data-lucide="sparkles" className="w-6 h-6"></i>
-                                    <span className="text-[9px] font-bold">المحادثة</span>
+                                <button onClick={() => setActiveTab('chat')} className={`nav-link flex flex-col items-center gap-0.5 ${activeTab === 'chat' ? 'active' : 'text-slate-500'}`}>
+                                    <i data-lucide="message-square" className="w-5 h-5"></i>
+                                    <span className="text-[8px] font-bold uppercase tracking-widest">الدردشة</span>
                                 </button>
-                                <button onClick={() => setActiveTab('about')} className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'about' ? 'text-purple-400 scale-110' : 'text-slate-500'}`}>
-                                    <i data-lucide="user" className="w-6 h-6"></i>
-                                    <span className="text-[9px] font-bold">المطور</span>
+                                <button onClick={() => setActiveTab('about')} className={`nav-link flex flex-col items-center gap-0.5 ${activeTab === 'about' ? 'active' : 'text-slate-500'}`}>
+                                    <i data-lucide="fingerprint" className="w-5 h-5"></i>
+                                    <span className="text-[8px] font-bold uppercase tracking-widest">المطور</span>
                                 </button>
                             </nav>
                         </div>
-                    </div>
+                    </footer>
                 </div>
             );
         };
