@@ -3,231 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeOS Dashboard</title>
+    <title>LifeOS | الذكاء الاصطناعي المتكامل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #050505;
-            --glass: rgba(255, 255, 255, 0.05);
-            --neon-blue: #08f7fe;
-            --neon-purple: #bc13fe;
-            --text: #ffffff;
-        }
-
         body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            height: 100vh;
+            font-family: 'Tajawal', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
             overflow: hidden;
         }
-
-        /* Sidebar */
-        .sidebar {
-            width: 80px;
-            background: rgba(255,255,255,0.02);
-            border-left: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 30px;
-            gap: 30px;
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
         }
-
-        .nav-item {
-            width: 45px;
-            height: 45px;
-            background: var(--glass);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.3s;
-            border: 1px solid rgba(255,255,255,0.1);
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
         }
-
-        .nav-item:hover {
-            background: var(--neon-blue);
-            box-shadow: 0 0 15px var(--neon-blue);
+        .chat-container {
+            height: calc(100vh - 180px);
         }
-
-        /* Main Content */
-        .main {
-            flex: 1;
-            padding: 40px;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        h1 { font-size: 2.5rem; margin: 0; letter-spacing: -1px; }
-        h1 span { color: var(--neon-blue); }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-        }
-
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px;
-            padding: 25px;
-            position: relative;
-        }
-
-        /* Timer Circle */
-        .timer-display {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 20px 0;
-            font-family: monospace;
-            color: var(--neon-purple);
-            text-shadow: 0 0 10px var(--neon-purple);
-        }
-
-        .btn {
-            background: white;
-            color: black;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn:hover { transform: scale(1.05); opacity: 0.9; }
-
-        /* Progress Bars */
-        .habit { margin-bottom: 20px; }
-        .progress-bg { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 8px; }
-        .progress-fill { height: 100%; border-radius: 10px; transition: 1s; }
-
-        /* Neon Background Glow */
-        .glow {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: var(--neon-purple);
-            filter: blur(150px);
-            opacity: 0.1;
-            z-index: -1;
-            top: -50px;
-            left: -50px;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            padding: 10px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 12px;
-        }
-
-        .check { width: 18px; height: 18px; border: 2px solid var(--neon-blue); border-radius: 4px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
     </style>
 </head>
-<body>
+<body class="h-screen flex p-4 gap-4">
 
-    <div class="sidebar">
-        <div class="nav-item">🏠</div>
-        <div class="nav-item">📅</div>
-        <div class="nav-item">📖</div>
-        <div class="nav-item">💰</div>
-    </div>
-
-    <div class="main">
-        <div class="glow"></div>
-        <div class="header">
-            <div>
-                <h1>Life<span>OS</span></h1>
-                <p style="color: gray;">مرحباً بك في نظامك المتكامل</p>
-            </div>
-            <div style="text-align: left;">
-                <div style="font-weight: bold;">Felix Doe</div>
-                <div style="color: var(--neon-blue); font-size: 12px;">مستوى الإنتاجية: 88%</div>
-            </div>
+    <nav class="w-20 glass-panel flex flex-col items-center py-8 gap-8">
+        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 s-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
         </div>
+        <div class="flex flex-col gap-6 mt-10">
+            <button class="text-blue-400 hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+            </button>
+            <button class="text-gray-500 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+            <button class="text-gray-500 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            </button>
+        </div>
+    </nav>
 
-        <div class="grid">
-            <div class="left-col">
-                <div class="card" style="margin-bottom: 25px;">
-                    <h3>المهام اليومية الذكية</h3>
-                    <div class="task-item"><div class="check" style="background: var(--neon-blue);"></div> مراجعة كود واجهة المستخدم</div>
-                    <div class="task-item"><div class="check"></div> اجتماع فريق العمل - 4 مساءً</div>
-                    <div class="task-item"><div class="check"></div> ممارسة الرياضة</div>
+    <div class="flex-1 flex flex-col gap-4 overflow-y-auto">
+        <header class="flex justify-between items-center p-2">
+            <h1 class="text-3xl font-bold tracking-tight">Life<span class="text-blue-500">OS</span></h1>
+            <div class="flex items-center gap-4 bg-gray-900/50 p-2 rounded-full px-6 border border-white/5">
+                <span class="text-sm text-gray-400">مستوى الطاقة الذكي: <span class="text-green-400">متفجر 🔥</span></span>
+                <img src="https://i.pravatar.cc/100" class="w-8 h-8 rounded-full border border-blue-500" alt="">
+            </div>
+        </header>
+
+        <div class="grid grid-cols-2 gap-4 h-full">
+            <div class="space-y-4">
+                <div class="glass-panel p-6 flex justify-between items-center bg-gradient-to-l from-blue-900/20 to-transparent">
+                    <div>
+                        <h3 class="text-gray-400 text-sm mb-1">الميزانية الحالية</h3>
+                        <p class="text-3xl font-bold">$12,450.00</p>
+                    </div>
+                    <div class="text-green-400 text-sm font-bold bg-green-400/10 p-2 rounded-lg">+14%</div>
                 </div>
 
-                <div class="card" style="background: linear-gradient(135deg, rgba(188, 19, 254, 0.1), transparent);">
-                    <h3>مساعد الذكاء الاصطناعي 🧠</h3>
-                    <p style="color: #ccc; font-style: italic;">"بناءً على نشاطك الأخير، أقترح عليك أخذ استراحة لمدة 5 دقائق الآن لزيادة تركيزك."</p>
-                    <button class="btn" style="background: var(--neon-purple); color: white;">تحديث الخطة</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-panel p-6 text-center">
+                        <p class="text-gray-400 text-xs mb-2">ساعات الدراسة</p>
+                        <p class="text-4xl font-bold font-mono" id="pomodoro">25:00</p>
+                        <button onclick="toggleTimer()" class="mt-4 w-full py-2 bg-blue-600 rounded-xl text-xs font-bold hover:bg-blue-500 transition-colors">بدأ التركيز</button>
+                    </div>
+                    <div class="glass-panel p-6">
+                        <h3 class="text-sm font-bold mb-4">العادات</h3>
+                        <div class="space-y-3">
+                            <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-500 w-3/4"></div>
+                            </div>
+                            <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-purple-500 w-1/2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 h-64 overflow-hidden">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span> المهام اليومية
+                    </h3>
+                    <div class="space-y-3 overflow-y-auto h-40">
+                        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
+                            <input type="checkbox" checked class="accent-blue-500">
+                            <span class="text-sm line-through text-gray-500">تصميم واجهة مستخدم LifeOS</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
+                            <input type="checkbox" class="accent-blue-500">
+                            <span class="text-sm">اجتماع مع المستثمرين</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
+                            <input type="checkbox" class="accent-blue-500">
+                            <span class="text-sm">قراءة 20 صفحة من كتاب جديد</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="right-col">
-                <div class="card" style="text-align: center; margin-bottom: 25px;">
-                    <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 2px;">Study Mode</p>
-                    <div class="timer-display" id="timer">25:00</div>
-                    <button class="btn" onclick="toggleTimer()" id="startBtn">ابدأ التركيز</button>
+            <div class="glass-panel flex flex-col p-4 border-blue-500/30">
+                <div class="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
+                    <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold">مساعد LifeOS الذكي</h2>
+                        <p class="text-[10px] text-green-400 uppercase tracking-widest font-bold">نشط الآن</p>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <h3>تتبع العادات</h3>
-                    <div class="habit">
-                        <span>شرب الماء</span>
-                        <div class="progress-bg"><div class="progress-fill" style="width: 70%; background: var(--neon-blue);"></div></div>
+                <div id="chat-box" class="chat-container flex flex-col gap-4 overflow-y-auto pr-2 mb-4">
+                    <div class="bg-blue-600/20 p-3 rounded-2xl rounded-tr-none max-w-[80%] text-sm self-start">
+                        أهلاً بك يا فليكس! كيف يمكنني مساعدتك اليوم في تنظيم جدولك أو مراجعة ميزانيتك؟
                     </div>
-                    <div class="habit">
-                        <span>القراءة</span>
-                        <div class="progress-bg"><div class="progress-fill" style="width: 40%; background: var(--neon-purple);"></div></div>
-                    </div>
+                </div>
+
+                <div class="mt-auto relative">
+                    <input id="user-input" type="text" placeholder="اسأل الذكاء الاصطناعي..." class="w-full bg-gray-800/50 border border-white/10 p-4 rounded-2xl outline-none focus:border-blue-500/50 transition-all text-sm">
+                    <button onclick="sendMessage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-blue-600 p-2 rounded-xl hover:bg-blue-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // منطق المؤقت البسيط
-        let timeLeft = 1500;
-        let isRunning = false;
-        let timerId;
+        // منطق المؤقت (Pomodoro)
+        let timer = 1500;
+        let running = false;
+        let interval;
 
         function toggleTimer() {
-            const btn = document.getElementById('startBtn');
-            if (isRunning) {
-                clearInterval(timerId);
-                btn.innerText = "ابدأ التركيز";
+            const btn = event.target;
+            if (running) {
+                clearInterval(interval);
+                btn.innerText = "بدأ التركيز";
             } else {
-                timerId = setInterval(() => {
-                    timeLeft--;
-                    updateDisplay();
-                    if (timeLeft <= 0) clearInterval(timerId);
+                interval = setInterval(() => {
+                    timer--;
+                    let m = Math.floor(timer / 60);
+                    let s = timer % 60;
+                    document.getElementById('pomodoro').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                    if(timer <= 0) clearInterval(interval);
                 }, 1000);
                 btn.innerText = "إيقاف مؤقت";
             }
-            isRunning = !isRunning;
+            running = !running;
         }
 
-        function updateDisplay() {
-            const m = Math.floor(timeLeft / 60);
-            const s = timeLeft % 60;
-            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        // منطق الدردشة البسيط
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            
+            if (input.value.trim() === "") return;
+
+            // رسالة المستخدم
+            const userMsg = document.createElement('div');
+            userMsg.className = "bg-gray-800 p-3 rounded-2xl rounded-tl-none max-w-[80%] text-sm self-end";
+            userMsg.innerText = input.value;
+            chatBox.appendChild(userMsg);
+
+            // استجابة وهمية سريعة
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = "bg-blue-600/20 p-3 rounded-2xl rounded-tr-none max-w-[80%] text-sm self-start";
+                aiMsg.innerText = "فهمت قصدك. جاري تحليل البيانات وتعديل الخطة لتناسب تطلعاتك...";
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 600);
+
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        // إرسال بالضغط على Enter
+        document.getElementById('user-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
     </script>
 </body>
 </html>
