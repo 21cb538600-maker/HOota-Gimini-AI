@@ -3,233 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>حوتة AI - المحرك المستقل</title>
+    <title>حوتة AI - الإصدار الفاخر</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800&family=Outfit:wght@300;600&display=swap');
         
         :root {
-            --bg-dark: #0e0e10;
-            --accent: #3b82f6;
-            --glass: rgba(255, 255, 255, 0.03);
+            --primary: #3b82f6;
+            --accent: #6366f1;
+            --bg-dark: #050507;
+            --card-bg: rgba(15, 15, 20, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
 
         body {
             font-family: 'Cairo', sans-serif;
             background-color: var(--bg-dark);
-            color: #e5e7eb;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%);
+            color: #f8fafc;
             margin: 0;
             height: 100vh;
             display: flex;
             overflow: hidden;
         }
 
-        @keyframes bounceIn {
-            0% { opacity: 0; transform: scale(0.9) translateY(10px); }
-            70% { transform: scale(1.02) translateY(-2px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
+        /* الطبقة الضوئية المتحركة في الخلفية */
+        .bg-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: -1;
+            animation: moveGlow 15s infinite alternate;
         }
 
-        .message-anim {
-            animation: bounceIn 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards;
+        @keyframes moveGlow {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(20%, 20%); }
         }
 
-        .msg-bubble {
-            max-width: 85%;
-            padding: 14px 18px;
-            font-size: 0.95rem;
-            line-height: 1.7;
-            border-radius: 20px;
-            position: relative;
-            transition: all 0.3s ease;
+        /* تحسين سلاسة ظهور الرسائل */
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+
+        .message-reveal {
+            animation: reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* تصميم الفقاعات الفاخر */
+        .bubble {
+            max-width: 80%;
+            padding: 16px 22px;
+            border-radius: 24px;
+            backdrop-filter: blur(12px);
+            font-size: 0.98rem;
+            line-height: 1.8;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .ai-bubble {
-            background: var(--glass);
-            border: 1px solid rgba(59, 130, 246, 0.1);
-            border-right: 4px solid var(--accent);
-            margin-right: 4px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border-right: 4px solid var(--primary);
+            color: #e2e8f0;
         }
 
         .user-bubble {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: #ffffff;
-            align-self: flex-end;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
             border-bottom-left-radius: 4px;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
 
-        .loader-halo {
+        /* الهالة المغناطيسية الفائقة */
+        .magnetic-loader {
+            width: 50px;
+            height: 50px;
             position: relative;
-            width: 42px;
-            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .loader-core {
-            width: 12px;
-            height: 12px;
-            background: var(--accent);
+        .orbit {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            box-shadow: 0 0 15px var(--accent);
-            animation: pulse-core 1s infinite alternate;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--primary);
+            animation: rotate 1s linear infinite;
         }
 
-        @keyframes pulse-core {
-            from { transform: scale(0.8); opacity: 0.5; }
-            to { transform: scale(1.2); opacity: 1; }
+        .orbit-inner {
+            width: 70%;
+            height: 70%;
+            border-top: 2px solid var(--accent);
+            animation: rotate 1.5s linear reverse infinite;
         }
 
-        .input-container {
-            background: rgba(30, 30, 32, 0.95);
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* شريط الإدخال الفاخر */
+        .glass-input {
+            background: rgba(20, 20, 25, 0.7);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #2a2a2c; border-radius: 10px; }
-
-        .suggestion-chip {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px 16px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .suggestion-chip:hover {
-            background: var(--accent);
-            border-color: var(--accent);
+        .glass-input:focus-within {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(25, 25, 30, 0.9);
             transform: translateY(-2px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4), 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
+    <div class="bg-glow"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="hidden md:flex flex-col w-72 bg-[#121214] border-l border-white/5 p-5 shrink-0">
-        <div class="flex items-center gap-3 mb-12">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <i class="fas fa-fish-bubble text-white text-xl"></i>
+    <aside id="sidebar" class="hidden md:flex flex-col w-80 bg-[#0a0a0c]/90 border-l border-white/5 p-6 backdrop-blur-xl z-20">
+        <div class="flex items-center gap-4 mb-14">
+            <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl rotate-3">
+                <i class="fas fa-whale text-white text-2xl"></i>
             </div>
-            <div class="flex flex-col">
-                <span class="font-bold text-lg leading-none">حوتة <span class="text-blue-500">AI</span></span>
-                <span class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">المحرك المستقل</span>
+            <div>
+                <h2 class="font-extrabold text-xl tracking-tight leading-none text-white">حوتة <span class="text-blue-500 text-sm italic">Ultra</span></h2>
+                <span class="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Autonomous Intelligence</span>
             </div>
         </div>
 
-        <button onclick="clearChat()" class="w-full py-3.5 mb-8 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-3">
-            <i class="fas fa-sparkles"></i> جلسة إبداع جديدة
+        <button onclick="clearChat()" class="w-full py-4 mb-10 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 hover:from-blue-600/20 hover:to-indigo-600/20 border border-blue-500/20 text-blue-400 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-3 group">
+            <i class="fas fa-plus-circle group-hover:rotate-90 transition-transform duration-500"></i> بدء مشروع جديد
         </button>
 
-        <div class="flex-1 overflow-y-auto custom-scroll space-y-6">
-            <div>
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-2">اقتراحات المحرك</p>
-                <div class="flex flex-wrap gap-2">
-                    <div onclick="quickAsk('أعطني فكرة لمشروع تقني')" class="suggestion-chip">💡 فكرة مشروع</div>
-                    <div onclick="quickAsk('اكتب لي نصيحة لليوم')" class="suggestion-chip">🌟 نصيحة اليوم</div>
-                    <div onclick="quickAsk('لغز رياضي سريع')" class="suggestion-chip">🧩 لغز</div>
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <p class="text-[10px] text-gray-600 uppercase tracking-[0.2em] mb-6 font-bold">مختبر الأفكار</p>
+            <div class="space-y-3">
+                <div onclick="quickAsk('صمم لي واجهة تطبيق احترافية')" class="p-4 bg-white/5 border border-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all text-sm text-gray-400 hover:text-white flex items-center gap-3">
+                    <i class="fas fa-palette text-blue-500"></i> تصميم واجهة
+                </div>
+                <div onclick="quickAsk('اكتب لي كود بايثون لتحليل البيانات')" class="p-4 bg-white/5 border border-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all text-sm text-gray-400 hover:text-white flex items-center gap-3">
+                    <i class="fas fa-code text-indigo-500"></i> كود برمجي
+                </div>
+                <div onclick="quickAsk('خطة تسويقية لمتجر إلكتروني')" class="p-4 bg-white/5 border border-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all text-sm text-gray-400 hover:text-white flex items-center gap-3">
+                    <i class="fas fa-chart-line text-emerald-500"></i> خطة عمل
                 </div>
             </div>
         </div>
-        
-        <div class="mt-auto pt-6 border-t border-white/5">
-            <div class="bg-blue-500/5 p-3 rounded-xl border border-blue-500/10">
-                <p class="text-[10px] text-blue-400 font-bold mb-1"><i class="fas fa-shield-check ml-1"></i> وضع الأمان الكامل</p>
-                <p class="text-[9px] text-gray-500 leading-relaxed">يعمل هذا المحرك محلياً 100% ولا يحتاج لاتصال خارجي أو مفاتيح.</p>
+
+        <div class="mt-8 p-4 bg-blue-600/5 rounded-3xl border border-blue-500/10">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                <span class="text-[10px] font-bold text-blue-400 uppercase">النظام مفعل</span>
             </div>
+            <p class="text-[11px] text-gray-500 leading-relaxed">أنت الآن تستخدم أقوى محرك محلي لمعالجة الأفكار بدون قيود.</p>
         </div>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col min-w-0 relative">
-        <header class="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-[#0e0e10]/90 backdrop-blur-md z-10">
+        <header class="h-20 flex items-center justify-between px-8 z-10">
             <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="md:hidden p-2 text-gray-400 hover:bg-white/5 rounded-lg"><i class="fas fa-bars-staggered"></i></button>
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <h1 class="font-bold text-sm text-gray-200">الذكاء المحلي: حوتة</h1>
+                <button onclick="toggleSidebar()" class="md:hidden w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl"><i class="fas fa-bars-staggered"></i></button>
+                <div class="h-10 w-[1px] bg-white/10 mx-2 hidden md:block"></div>
+                <div class="flex flex-col">
+                    <span class="text-xs text-gray-500 font-bold uppercase tracking-widest">Active Session</span>
+                    <span class="text-sm font-semibold text-white">الذكاء المحيطي المستقل</span>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="hidden sm:block text-[10px] text-gray-500 font-mono">OFFLINE_ACTIVE_v4</span>
-                <div class="w-9 h-9 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
-                    <i class="fas fa-microchip text-blue-500 text-xs"></i>
+            
+            <div class="flex items-center gap-6">
+                <div class="hidden lg:flex flex-col items-end">
+                    <span class="text-[10px] text-emerald-500 font-bold">LATENCY: 0.2ms</span>
+                    <span class="text-[10px] text-gray-600">ENGINE: LOCAL_CORE_V5</span>
+                </div>
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-white/10 flex items-center justify-center shadow-xl">
+                    <i class="fas fa-shield-halved text-blue-500 text-sm"></i>
                 </div>
             </div>
         </header>
 
-        <!-- Chat History -->
-        <div id="chat-stream" class="flex-1 overflow-y-auto px-4 md:px-24 lg:px-48 py-10 space-y-8 custom-scroll">
-            <div id="welcome-msg" class="max-w-2xl mx-auto text-center py-20">
-                <div class="relative w-28 h-28 mx-auto mb-10">
-                    <div class="absolute inset-0 bg-blue-600 blur-3xl opacity-20 animate-pulse"></div>
-                    <div class="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-[2.5rem] w-full h-full flex items-center justify-center border border-white/10">
-                        <i class="fas fa-whale text-5xl text-blue-500"></i>
+        <!-- Chat Stream -->
+        <div id="chat-stream" class="flex-1 overflow-y-auto px-4 md:px-24 lg:px-64 py-12 space-y-10 custom-scrollbar scroll-smooth">
+            <div id="welcome-msg" class="max-w-3xl mx-auto text-center py-20">
+                <div class="relative w-32 h-32 mx-auto mb-12">
+                    <div class="absolute inset-0 bg-blue-500/30 blur-[60px] animate-pulse rounded-full"></div>
+                    <div class="relative w-full h-full bg-[#121214] rounded-[2.5rem] border border-white/10 flex items-center justify-center shadow-2xl">
+                        <i class="fas fa-atom text-5xl text-blue-500 animate-[spin_10s_linear_infinite]"></i>
                     </div>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-black mb-6 tracking-tight">أنا حوتة AI المحلي</h2>
-                <p class="text-gray-400 text-base md:text-lg max-w-md mx-auto leading-relaxed">
-                    لقد تم تفعيل نظام "التوليد الذاتي". يمكنني الآن مساعدتك في توليد الأفكار والإجابة بدون أي مفاتيح خارجية.
+                <h1 class="text-4xl md:text-5xl font-black mb-6 tracking-tight text-white">مرحباً بك في <span class="text-blue-500">مستقبل</span> الأفكار</h1>
+                <p class="text-gray-500 text-lg max-w-lg mx-auto leading-relaxed font-light">
+                    محرك حوتة الجديد مصمم ليكون شريكك في الإبداع. اطلب أي فكرة، لغز، أو استشارة برمجية الآن.
                 </p>
             </div>
         </div>
 
-        <!-- Loader -->
-        <div id="loader" class="hidden px-4 md:px-24 lg:px-48 py-6">
-            <div class="flex items-center gap-4">
-                <div class="loader-halo">
-                    <div class="loader-core"></div>
+        <!-- Luxury Loader -->
+        <div id="loader" class="hidden px-4 md:px-24 lg:px-64 py-8">
+            <div class="flex items-center gap-5">
+                <div class="magnetic-loader">
+                    <div class="orbit"></div>
+                    <div class="orbit orbit-inner"></div>
+                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
                 </div>
-                <span class="text-[10px] text-blue-400 font-bold tracking-[0.3em] uppercase">توليد أفكار...</span>
+                <div class="flex flex-col">
+                    <span class="text-[11px] text-blue-400 font-bold tracking-[0.4em] uppercase">Neural Synthesis</span>
+                    <span class="text-[9px] text-gray-600 font-medium">جاري معالجة الأفكار في الوقت الفعلي...</span>
+                </div>
             </div>
         </div>
 
-        <!-- Input Section -->
-        <footer class="p-6 md:p-10">
-            <div class="max-w-4xl mx-auto">
-                <div class="input-container flex items-end p-2.5 shadow-2xl">
-                    <button class="p-3 text-gray-500 hover:text-white transition-colors"><i class="fas fa-microphone"></i></button>
-                    <textarea id="msg-input" rows="1" placeholder="اطلب فكرة، لغزاً، أو نصيحة..." class="flex-1 bg-transparent border-none outline-none py-3 px-3 text-base md:text-lg text-right resize-none placeholder:text-gray-600"></textarea>
-                    <button id="send-btn" class="w-12 h-12 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-blue-600/20">
-                        <i class="fas fa-paper-plane-top text-lg"></i>
+        <!-- Input Area -->
+        <footer class="p-8 md:p-14">
+            <div class="max-w-5xl mx-auto">
+                <div class="glass-input flex items-end p-3 gap-2">
+                    <button class="w-12 h-12 flex items-center justify-center text-gray-500 hover:text-blue-500 transition-colors"><i class="fas fa-wand-magic-sparkles"></i></button>
+                    <textarea id="msg-input" rows="1" placeholder="أدخل تساؤلك هنا ليتم تحليله..." class="flex-1 bg-transparent border-none outline-none py-4 px-4 text-base md:text-lg text-white text-right resize-none placeholder:text-gray-600 font-light"></textarea>
+                    <button id="send-btn" class="w-14 h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-2xl shadow-blue-600/20 btn-glow">
+                        <i class="fas fa-arrow-up-long text-xl"></i>
                     </button>
+                </div>
+                <div class="flex justify-center gap-8 mt-6">
+                    <span class="text-[9px] text-gray-700 font-bold uppercase tracking-[0.5em]">Privacy Secured</span>
+                    <span class="text-[9px] text-gray-700 font-bold uppercase tracking-[0.5em]">Offline Engine</span>
+                    <span class="text-[9px] text-gray-700 font-bold uppercase tracking-[0.5em]">Ultra v5.0</span>
                 </div>
             </div>
         </footer>
     </main>
 
     <script>
-        /** قاعدة المعرفة المحلية - محرك حوتة المستقل **/
-        const LOCAL_BRAIN = {
-            greetings: ["أهلاً بك! أنا حوتة في وضع التشغيل الذاتي. كيف أساعدك اليوم؟", "مرحباً! لقد قمت بتشغيل المحرك المحلي، أنا جاهز للأوامر."],
-            ideas: [
-                "فكرة مشروع: تطبيق 'مبادل' لتبادل الكتب المستعملة في حيك السكني باستخدام الموقع الجغرافي.",
-                "فكرة إبداعية: ماذا لو كان هناك جهاز يترجم مشاعر الحيوانات الأليفة إلى ألوان تظهر على طوقها؟",
-                "فكرة تقنية: منصة تعتمد على الذكاء الاصطناعي لمساعدة الطلاب في تحويل المحاضرات الصوتية إلى خرائط ذهنية فورية.",
-                "فكرة محتوى: سلسلة فيديوهات قصيرة تشرح 'تاريخ الأشياء العادية' التي نستخدمها يومياً ولا نعرف أصلها."
+        // مصفوفة الذكاء المحلي (أكثر غزارة وعمقاً)
+        const KNOWLEDGE_BASE = {
+            greetings: ["أهلاً بك في فضاء حوتة الإبداعي. أنا في كامل جاهزيتي، ماذا سنبتكر اليوم؟", "مرحباً! لقد تم تحميل كافة بروتوكولات الذكاء المحلي. تفضل بسؤالك."],
+            design: [
+                "نصيحة تصميم: استخدم قاعدة 60-30-10 للألوان (60% للون الأساسي، 30% للثانوي، 10% للون التمييز) لخلق توازن بصري مذهل.",
+                "فكرة واجهة: صمم تطبيقاً يعتمد على 'الوضع الزجاجي' (Glassmorphism) مع خلفيات متحركة تتغير بناءً على حالة الطقس في مدينتك.",
+                "اتجاه حديث: الـ Bento Grid هو التوجه الأبرز الآن؛ تنظيم العناصر في مربعات زواياها دائرية مع مسافات بيضاء واسعة."
             ],
-            tips: [
-                "نصيحة اليوم: ابدأ يومك بأصعب مهمة (Frog Eating)، فبقية اليوم سيكون أسهل بكثير.",
-                "نصيحة تقنية: لا تعتمد على ذاكرتك أبداً، استخدم نظام تدوين ملاحظات رقمي (مثل Notion) لفرز أفكارك.",
-                "نصيحة صحية: قاعدة 20-20-20؛ كل 20 دقيقة أمام الشاشة، انظر لشيء يبعد 20 قدماً لمدة 20 ثانية."
+            code: [
+                "نصيحة برمجية: اتبع مبدأ DRY (Don't Repeat Yourself)؛ إذا كتبت الكود مرتين، اجعله دالة (Function).",
+                "فكرة مشروع: بناء أداة CLI (واجهة سطر أوامر) بسيطة تقوم بتنظيم ملفات التحميل تلقائياً بناءً على نوع الملف (صور، مستندات، فيديو).",
+                "تقنية: جرب استخدام Tailwind CSS مع Framer Motion في مشاريعك القادمة للحصول على واجهات سريعة وحركات انسيابية."
             ],
             riddles: [
-                "لغز: ما هو الشيء الذي له أسنان ولا يعض؟ (الجواب: المشط)",
-                "لغز: شيء تملكه أنت، ولكن يستخدمه الآخرون أكثر منك؟ (الجواب: اسمك)",
-                "لغز: أين تجد المدن، والبيوت، والشوارع ولكن بدون ناس؟ (الجواب: الخريطة)"
+                "لغز للمحترفين: أنا موجود في بداية النهار وفي نهاية العمر، فمن أنا؟ (الجواب: حرف الراء)",
+                "لغز ذكاء: ما هو الشيء الذي يمتلك قلباً ولكن لا يمتلك روحاً؟ (الجواب: التفاحة أو الساعة اليدوية)",
+                "تحدي: كيف يمكنك الحصول على الرقم 100 باستخدام الرقم 9 أربع مرات فقط؟ (الجواب: 99 + 9/9)"
             ],
-            fallback: [
-                "هذا مذهل! كوني أعمل في الوضع المحلي، أرى أن فكرتك تحمل إمكانيات كبيرة.",
-                "سؤال مثير للاهتمام. في عالم الأفكار، لا يوجد مستحيل. هل تريدني أن أتعمق أكثر في هذا الجانب؟",
-                "أنا أفهمك تماماً. دعنا نحاول صياغة هذه الفكرة بطريقة إبداعية أخرى."
+            default: [
+                "هذا التساؤل يفتح آفاقاً جديدة. من وجهة نظر تقنية، يمكننا البدء بتحليل العناصر الأساسية أولاً.",
+                "فكرة رائعة! لقد قمت بمعالجة طلبك، وأرى أن التوجه نحو البساطة هو الحل الأمثل هنا.",
+                "بصفتي ذكاءً مستقلاً، أقترح عليك البدء بتنفيذ النموذج الأولي ثم التطوير تدريجياً."
             ]
         };
 
@@ -239,10 +287,10 @@
         const sendBtn = document.getElementById('send-btn');
         const loader = document.getElementById('loader');
 
-        let chatHistory = JSON.parse(localStorage.getItem('hoota_local_v4') || '[]');
+        let messages = JSON.parse(localStorage.getItem('hoota_luxury_v5') || '[]');
 
         function init() {
-            render(chatHistory);
+            render(messages);
         }
 
         function render(msgs) {
@@ -251,11 +299,11 @@
             msgs.forEach(m => {
                 const isAi = m.role === 'ai';
                 const div = document.createElement('div');
-                div.className = `flex ${isAi ? 'justify-start' : 'justify-end'} message-anim`;
+                div.className = `flex ${isAi ? 'justify-start' : 'justify-end'} message-reveal`;
                 div.innerHTML = `
-                    <div class="msg-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}">
-                        ${isAi ? '<div class="text-[10px] font-bold text-blue-400 mb-1">حوتة المحلي</div>' : ''}
-                        <div class="whitespace-pre-wrap">${m.text}</div>
+                    <div class="bubble ${isAi ? 'ai-bubble' : 'user-bubble'}">
+                        ${isAi ? '<div class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-2 opacity-70">HOOTA SYNTHESIS</div>' : ''}
+                        <div class="font-light">${m.text}</div>
                     </div>
                 `;
                 stream.appendChild(div);
@@ -263,65 +311,42 @@
             stream.scrollTop = stream.scrollHeight;
         }
 
-        // محرك التوليد المنطقي (Local Logic Engine)
-        function generateLocalResponse(prompt) {
-            const p = prompt.toLowerCase();
-            
-            if (p.includes("مرحبا") || p.includes("سلام") || p.includes("هاي")) 
-                return LOCAL_BRAIN.greetings[Math.floor(Math.random() * LOCAL_BRAIN.greetings.length)];
-            
-            if (p.includes("فكرة") || p.includes("مشروع") || p.includes("تفكير"))
-                return LOCAL_BRAIN.ideas[Math.floor(Math.random() * LOCAL_BRAIN.ideas.length)];
-            
-            if (p.includes("نصيحة") || p.includes("طورني"))
-                return LOCAL_BRAIN.tips[Math.floor(Math.random() * LOCAL_BRAIN.tips.length)];
-            
-            if (p.includes("لغز") || p.includes("تحدي"))
-                return LOCAL_BRAIN.riddles[Math.floor(Math.random() * LOCAL_BRAIN.riddles.length)];
-
-            return LOCAL_BRAIN.fallback[Math.floor(Math.random() * LOCAL_BRAIN.fallback.length)];
+        function getResponse(userText) {
+            const txt = userText.toLowerCase();
+            if (txt.includes("مرحبا") || txt.includes("سلام")) return KNOWLEDGE_BASE.greetings[Math.floor(Math.random()*KNOWLEDGE_BASE.greetings.length)];
+            if (txt.includes("تصميم") || txt.includes("واجهة")) return KNOWLEDGE_BASE.design[Math.floor(Math.random()*KNOWLEDGE_BASE.design.length)];
+            if (txt.includes("كود") || txt.includes("برمج")) return KNOWLEDGE_BASE.code[Math.floor(Math.random()*KNOWLEDGE_BASE.code.length)];
+            if (txt.includes("لغز") || txt.includes("تحدي")) return KNOWLEDGE_BASE.riddles[Math.floor(Math.random()*KNOWLEDGE_BASE.riddles.length)];
+            return KNOWLEDGE_BASE.default[Math.floor(Math.random()*KNOWLEDGE_BASE.default.length)];
         }
 
         async function handleSend() {
-            const text = input.value.trim();
-            if (!text || sendBtn.disabled) return;
+            const val = input.value.trim();
+            if (!val || sendBtn.disabled) return;
 
             input.value = '';
             input.style.height = 'auto';
             sendBtn.disabled = true;
             loader.classList.remove('hidden');
-            
-            // إضافة رسالة المستخدم
-            chatHistory.push({ role: 'user', text });
-            render(chatHistory);
 
-            // محاكاة وقت التفكير (سلس جداً)
+            messages.push({ role: 'user', text: val });
+            render(messages);
+
             setTimeout(() => {
-                const aiReply = generateLocalResponse(text);
-                chatHistory.push({ role: 'ai', text: aiReply });
-                localStorage.setItem('hoota_local_v4', JSON.stringify(chatHistory));
-                render(chatHistory);
+                const reply = getResponse(val);
+                messages.push({ role: 'ai', text: reply });
+                localStorage.setItem('hoota_luxury_v5', JSON.stringify(messages));
+                render(messages);
                 sendBtn.disabled = false;
                 loader.classList.add('hidden');
-            }, 800);
+            }, 1200);
         }
 
-        window.quickAsk = (q) => {
-            input.value = q;
-            handleSend();
-        };
-
-        window.clearChat = () => {
-            if(confirm("مسح السجل الإبداعي؟")) {
-                localStorage.removeItem('hoota_local_v4');
-                chatHistory = [];
-                render([]);
-            }
-        };
-
+        window.quickAsk = (q) => { input.value = q; handleSend(); };
+        window.clearChat = () => { if(confirm("هل تريد تصفير ذاكرة الجلسة؟")) { localStorage.removeItem('hoota_luxury_v5'); messages=[]; render([]); } };
         window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('hidden'); };
         input.oninput = function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; };
-        input.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
+        input.onkeydown = (e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
         sendBtn.onclick = handleSend;
 
         init();
