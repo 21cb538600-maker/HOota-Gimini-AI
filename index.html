@@ -1,180 +1,302 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>HOota AI Premium</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حوتة AI - النسخة السلسة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-dark: #0e0e10;
+            --bg-card: #1c1c1e;
+            --accent: #3b82f6;
+        }
 
-<script src="https://cdn.tailwindcss.com"></script>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e5e7eb;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
 
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        /* Smooth Animations for Messages */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(15px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
-<style>
-body {
-  margin: 0;
-  font-family: system-ui;
-  background: radial-gradient(circle at top, #0f172a, #020617);
-}
-.glass {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-</style>
+        .message-anim {
+            animation: slideUpFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        /* Message Styles */
+        .msg-bubble {
+            max-width: 82%;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            transition: all 0.2s ease;
+        }
+
+        .ai-bubble {
+            background: transparent;
+            border-right: 2px solid var(--accent);
+            margin-right: 8px;
+        }
+
+        .user-bubble {
+            background-color: #2c2c2e;
+            border-radius: 20px 20px 4px 20px;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Enhanced Loading Animation */
+        .loader-halo {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: var(--accent);
+            border-left-color: #8b5cf6;
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-bolt {
+            font-size: 1.1rem;
+            color: #fbbf24;
+            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+            animation: pulse-bolt 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-bolt {
+            from { transform: scale(0.9); opacity: 0.7; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Input Glass Effect */
+        .input-box {
+            background: rgba(28, 28, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-box:focus-within {
+            border-color: var(--accent);
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 10px; }
+    </style>
 </head>
-
 <body>
-<div id="root"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getAuth,
-  signInAnonymously,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    <!-- Sidebar -->
+    <aside id="sidebar" class="hidden md:flex flex-col w-64 bg-[#18181b] border-l border-white/5 p-4 transition-all duration-300">
+        <div class="flex items-center gap-3 mb-10 px-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <i class="fas fa-h text-white"></i>
+            </div>
+            <span class="font-bold text-lg tracking-wide">Hoota <span class="text-blue-500">AI</span></span>
+        </div>
 
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        <button onclick="window.location.reload()" class="w-full py-3 mb-6 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2">
+            <i class="fas fa-plus-circle"></i> دردشة جديدة
+        </button>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBsvF9J_DneR5H0JbOW4HX_JjVWaajAUgk",
-  authDomain: "website-8833c.firebaseapp.com",
-  projectId: "website-8833c",
-};
+        <div class="flex-1 overflow-y-auto custom-scroll">
+            <div id="history-list" class="space-y-2 px-1">
+                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4">الجلسات الأخيرة</p>
+                <div class="text-[11px] text-gray-600 italic px-2">لا توجد سجلات حالية</div>
+            </div>
+        </div>
+    </aside>
 
-const GEMINI_API_KEY = "";
+    <!-- Content -->
+    <main class="flex-1 flex flex-col min-w-0 relative">
+        <header class="h-14 flex items-center justify-between px-6 border-b border-white/5">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 text-gray-400"><i class="fas fa-bars"></i></button>
+                <h1 class="font-semibold text-sm text-gray-300">حوتة AI <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v3.1</span></h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <i class="fas fa-bolt text-xs text-yellow-500 animate-pulse"></i>
+                <div class="w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+                    <i class="fas fa-robot text-blue-500 text-xs"></i>
+                </div>
+            </div>
+        </header>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+        <!-- Messages -->
+        <div id="chat-stream" class="flex-1 overflow-y-auto px-4 md:px-32 py-10 space-y-6 custom-scroll">
+            <div id="welcome-msg" class="max-w-2xl mx-auto text-center py-20">
+                <div class="w-20 h-20 bg-blue-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-comment-dots text-3xl text-blue-500"></i>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold mb-4">مرحباً بك في عالم حوتة</h2>
+                <p class="text-gray-500 text-sm md:text-base">أنا رفيقك الذكي، جاهز للإجابة على تساؤلاتك بكل سلاسة وسرعة.</p>
+            </div>
+        </div>
 
-const e = React.createElement;
+        <!-- Animated Loader -->
+        <div id="loader" class="hidden px-4 md:px-32 py-4">
+            <div class="flex items-center gap-4">
+                <div class="loader-halo">
+                    <div class="loader-ring"></div>
+                    <i class="fas fa-bolt loader-bolt"></i>
+                </div>
+                <span class="text-[11px] text-blue-400 font-bold tracking-[0.2em] uppercase">Neural Syncing...</span>
+            </div>
+        </div>
 
-function App() {
-  const [user, setUser] = React.useState(null);
-  const [messages, setMessages] = React.useState([]);
-  const [text, setText] = React.useState("");
-  const [loading, setLoading] = React.useState(true);
+        <!-- Footer Input -->
+        <footer class="p-4 md:p-8 bg-gradient-to-t from-black/20 to-transparent">
+            <div class="max-w-3xl mx-auto relative">
+                <div class="input-box flex items-center p-2 shadow-2xl">
+                    <button class="p-3 text-gray-500 hover:text-white transition-colors"><i class="fas fa-paperclip"></i></button>
+                    <textarea id="msg-input" rows="1" placeholder="اسأل حوتة عن أي شيء..." class="flex-1 bg-transparent border-none outline-none py-3 px-2 text-base text-right resize-none placeholder:text-gray-600"></textarea>
+                    <button id="send-btn" class="w-12 h-12 bg-blue-600 hover:bg-blue-500 text-white rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg disabled:opacity-30">
+                        <i class="fas fa-paper-plane transform rotate-180"></i>
+                    </button>
+                </div>
+                <p class="text-[9px] text-center text-gray-700 mt-4 uppercase tracking-widest">Hoota AI Engine • Optimized for Speed</p>
+            </div>
+        </footer>
+    </main>
 
-  React.useEffect(() => {
-    signInAnonymously(auth);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hoota-smooth-final';
+        const apiKey = "";
 
-    return () => unsub();
-  }, []);
+        const stream = document.getElementById('chat-stream');
+        const welcome = document.getElementById('welcome-msg');
+        const input = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+        const loader = document.getElementById('loader');
 
-  React.useEffect(() => {
-    if (!user) return;
+        let user = null;
 
-    const q = query(
-      collection(db, "chats"),
-      orderBy("timestamp", "asc")
-    );
+        // Auth
+        (async () => {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        })();
 
-    const unsub = onSnapshot(q, (snap) => {
-      setMessages(snap.docs.map(d => d.data()));
-    });
+        onAuthStateChanged(auth, (u) => {
+            if (u) { user = u; listen(); }
+        });
 
-    return () => unsub();
-  }, [user]);
+        function listen() {
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'chats'));
+            onSnapshot(q, (snap) => {
+                const msgs = snap.docs.map(d => d.data()).sort((a,b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
+                draw(msgs);
+            });
+        }
 
-  async function askGemini(prompt) {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }]
-        })
-      }
-    );
+        function draw(msgs) {
+            if (msgs.length > 0) welcome.classList.add('hidden');
+            stream.innerHTML = msgs.length === 0 ? welcome.outerHTML : '';
+            
+            msgs.forEach(m => {
+                const isAi = m.role === 'ai';
+                const div = document.createElement('div');
+                div.className = `flex ${isAi ? 'justify-start' : 'justify-end'} message-anim`;
+                div.innerHTML = `
+                    <div class="msg-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}">
+                        ${isAi ? '<div class="text-[10px] font-bold text-blue-500 mb-1">حوتة AI</div>' : ''}
+                        <div class="whitespace-pre-wrap">${m.text}</div>
+                    </div>
+                `;
+                stream.appendChild(div);
+            });
+            stream.scrollTop = stream.scrollHeight;
+        }
 
-    const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Error AI";
-  }
+        async function fetchAI(prompt) {
+            const system = "أنت 'حوتة آي' (Hoota AI). لا ترحب بالمستخدم في كل رسالة. ترحب فقط إذا بادر المستخدم بالتحية (مثل: سلام، مرحبا، هاي) أو سألك عن حالك أو هويتك. ردودك سريعة، دقيقة، ومختصرة إلا إذا طلب المستخدم التفصيل.";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: system }] }
+                    })
+                });
+                const data = await res.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "اعتذر، حدث خطأ تقني.";
+            } catch (e) {
+                return "خطأ في الاتصال بالمحرك.";
+            }
+        }
 
-  const send = async () => {
-    if (!text.trim()) return;
+        async function handleSend() {
+            const text = input.value.trim();
+            if (!text || !user || sendBtn.disabled) return;
 
-    const userMsg = text;
-    setText("");
+            input.value = '';
+            input.style.height = 'auto';
+            sendBtn.disabled = true;
+            loader.classList.remove('hidden');
+            stream.scrollTop = stream.scrollHeight;
 
-    await addDoc(collection(db,"chats"),{
-      text:userMsg,
-      role:"user",
-      timestamp:serverTimestamp()
-    });
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats'), {
+                    text, role: 'user', uid: user.uid, timestamp: serverTimestamp()
+                });
 
-    const ai = await askGemini(userMsg);
+                const reply = await fetchAI(text);
 
-    await addDoc(collection(db,"chats"),{
-      text:ai,
-      role:"ai",
-      timestamp:serverTimestamp()
-    });
-  };
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats'), {
+                    text: reply, role: 'ai', timestamp: serverTimestamp()
+                });
+            } finally {
+                sendBtn.disabled = false;
+                loader.classList.add('hidden');
+            }
+        }
 
-  if (loading) {
-    return e("div",{className:"h-screen flex items-center justify-center text-white"},
-      "جاري تشغيل HOota AI..."
-    );
-  }
-
-  return e("div",{className:"h-screen flex flex-col text-white"},
-
-    // HEADER
-    e("div",{className:"glass p-4 text-center font-bold text-cyan-400"},
-      "HOota AI • Premium Assistant"
-    ),
-
-    // CHAT
-    e("div",{className:"flex-1 overflow-y-auto p-4 space-y-3"},
-      messages.map((m,i)=>
-        e("div",{
-          key:i,
-          className:
-            "p-3 rounded-xl max-w-[80%] " +
-            (m.role==="ai"
-              ? "bg-white/5 border border-white/10"
-              : "bg-cyan-600 ml-auto")
-        },m.text)
-      )
-    ),
-
-    // INPUT
-    e("div",{className:"p-3 glass flex gap-2"},
-      e("input",{
-        value:text,
-        onChange:(e)=>setText(e.target.value),
-        placeholder:"اكتب رسالتك...",
-        className:"flex-1 p-3 bg-black/40 rounded-xl outline-none"
-      }),
-      e("button",{
-        onClick:send,
-        className:"bg-cyan-500 px-5 rounded-xl font-bold"
-      },"إرسال")
-    )
-  );
-}
-
-ReactDOM.render(e(App), document.getElementById("root"));
-</script>
-
+        sendBtn.onclick = handleSend;
+        input.onkeydown = (e) => (e.key === 'Enter' && !e.shiftKey) ? (e.preventDefault(), handleSend()) : null;
+        input.oninput = function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; };
+        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('hidden'); };
+    </script>
 </body>
 </html>
