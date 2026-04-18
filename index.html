@@ -3,219 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeOS | المستقبل بين يديك</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-
+    <title>LifeOS Dashboard</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        
+        :root {
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+            --neon-blue: #08f7fe;
+            --neon-purple: #bc13fe;
+            --text: #ffffff;
+        }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #050505;
-            color: white;
             margin: 0;
-            overflow-x: hidden;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
+        /* Sidebar */
+        .sidebar {
+            width: 80px;
+            background: rgba(255,255,255,0.02);
+            border-left: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 30px;
+            gap: 30px;
         }
 
-        .neon-text-purple { text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
-        .neon-border-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-        
-        /* لإخفاء شريط التمرير */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .nav-item {
+            width: 45px;
+            height: 45px;
+            background: var(--glass);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-item:hover {
+            background: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        h1 { font-size: 2.5rem; margin: 0; letter-spacing: -1px; }
+        h1 span { color: var(--neon-blue); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 25px;
+            position: relative;
+        }
+
+        /* Timer Circle */
+        .timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            font-family: monospace;
+            color: var(--neon-purple);
+            text-shadow: 0 0 10px var(--neon-purple);
+        }
+
+        .btn {
+            background: white;
+            color: black;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover { transform: scale(1.05); opacity: 0.9; }
+
+        /* Progress Bars */
+        .habit { margin-bottom: 20px; }
+        .progress-bg { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 8px; }
+        .progress-fill { height: 100%; border-radius: 10px; transition: 1s; }
+
+        /* Neon Background Glow */
+        .glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--neon-purple);
+            filter: blur(150px);
+            opacity: 0.1;
+            z-index: -1;
+            top: -50px;
+            left: -50px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+        }
+
+        .check { width: 18px; height: 18px; border: 2px solid var(--neon-blue); border-radius: 4px; }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { motion, AnimatePresence } = window.framerMotion;
+    <div class="sidebar">
+        <div class="nav-item">🏠</div>
+        <div class="nav-item">📅</div>
+        <div class="nav-item">📖</div>
+        <div class="nav-item">💰</div>
+    </div>
 
-        // --- المكونات المساعدة ---
-        const Icon = ({ name, size = 20, className = "" }) => {
-            useEffect(() => { lucide.createIcons(); }, []);
-            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
-        };
-
-        const GlassCard = ({ children, className = "" }) => (
-            <div className={`glass p-6 transition-all duration-300 hover:border-white/20 ${className}`}>
-                {children}
+    <div class="main">
+        <div class="glow"></div>
+        <div class="header">
+            <div>
+                <h1>Life<span>OS</span></h1>
+                <p style="color: gray;">مرحباً بك في نظامك المتكامل</p>
             </div>
-        );
+            <div style="text-align: left;">
+                <div style="font-weight: bold;">Felix Doe</div>
+                <div style="color: var(--neon-blue); font-size: 12px;">مستوى الإنتاجية: 88%</div>
+            </div>
+        </div>
 
-        // --- التطبيق الرئيسي ---
-        function LifeOS() {
-            const [activeTab, setActiveTab] = useState('dashboard');
-            const [timer, setTimer] = useState(1500);
-            const [isRunning, setIsRunning] = useState(false);
-
-            useEffect(() => {
-                let interval;
-                if (isRunning && timer > 0) {
-                    interval = setInterval(() => setTimer(t => t - 1), 1000);
-                } else {
-                    clearInterval(interval);
-                }
-                return () => clearInterval(interval);
-            }, [isRunning, timer]);
-
-            const formatTime = (s) => {
-                const m = Math.floor(s / 60);
-                const sec = s % 60;
-                return `${m}:${sec < 10 ? '0' : ''}${sec}`;
-            };
-
-            return (
-                <div className="flex min-h-screen relative">
-                    {/* إضاءة خلفية نيون */}
-                    <div className="fixed top-[-10%] left-[-10%] w-96 h-96 bg-purple-600/10 blur-[120px] rounded-full"></div>
-                    <div className="fixed bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full"></div>
-
-                    {/* Sidebar */}
-                    <nav className="w-24 border-l border-white/5 flex flex-col items-center py-8 gap-10 z-50">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                            <Icon name="zap" className="text-white" />
-                        </div>
-                        
-                        <div className="flex flex-col gap-6">
-                            <NavButton icon="layout-dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-                            <NavButton icon="check-circle" active={activeTab === 'tasks'} onClick={() => setActiveTab('tasks')} />
-                            <NavButton icon="timer" active={activeTab === 'study'} onClick={() => setActiveTab('study')} />
-                            <NavButton icon="wallet" active={activeTab === 'money'} onClick={() => setActiveTab('money')} />
-                        </div>
-                    </nav>
-
-                    {/* Main Content */}
-                    <main className="flex-1 p-10 overflow-y-auto z-10">
-                        <header className="flex justify-between items-center mb-12">
-                            <div>
-                                <h1 className="text-4xl font-extrabold tracking-tighter">Life<span className="text-blue-500">OS</span></h1>
-                                <p className="text-gray-500 text-sm mt-2">مرحباً بك، النظام يعمل بكفاءة 100%</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="glass px-4 py-2 flex items-center gap-3">
-                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                    <span className="text-xs font-medium">الذكاء الاصطناعي متصل</span>
-                                </div>
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" className="w-12 h-12 rounded-full border border-white/10" />
-                            </div>
-                        </header>
-
-                        <div className="grid grid-cols-12 gap-6">
-                            {/* Dashboard Chart Preview */}
-                            <div className="col-span-8 space-y-6">
-                                <GlassCard className="h-64 flex flex-col justify-between">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="text-lg font-semibold">معدل الإنجاز الأسبوعي</h3>
-                                        <Icon name="trending-up" className="text-green-400" />
-                                    </div>
-                                    <div className="flex items-end justify-between h-32 gap-3">
-                                        {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
-                                            <div key={i} className="flex-1 bg-gradient-to-t from-blue-600/20 to-blue-400 rounded-t-lg transition-all duration-500" style={{ height: `${h}%` }}></div>
-                                        ))}
-                                    </div>
-                                </GlassCard>
-
-                                <div className="grid grid-cols-2 gap-6">
-                                    <GlassCard>
-                                        <h3 className="font-bold mb-4 flex items-center gap-2">
-                                            <Icon name="list-todo" className="text-purple-400" /> المهام العاجلة
-                                        </h3>
-                                        <div className="space-y-3">
-                                            <TaskItem text="تطوير واجهة المستخدم" done={true} />
-                                            <TaskItem text="مراجعة التقارير المالية" />
-                                            <TaskItem text="جلسة عصف ذهني" />
-                                        </div>
-                                    </GlassCard>
-                                    <GlassCard className="bg-gradient-to-br from-purple-900/20 to-transparent">
-                                        <h3 className="font-bold mb-2 flex items-center gap-2 text-purple-400">
-                                            <Icon name="sparkles" /> مساعد الذكاء الاصطناعي
-                                        </h3>
-                                        <p className="text-sm text-gray-400 italic font-light">
-                                            "لقد لاحظت أن إنتاجيتك تزداد في المساء، هل نؤجل المهام البرمجية الكبيرة لليوم؟"
-                                        </p>
-                                        <button className="mt-4 w-full py-2 bg-white text-black rounded-xl text-xs font-bold hover:bg-gray-200">تحسين الجدول</button>
-                                    </GlassCard>
-                                </div>
-                            </div>
-
-                            {/* Sidebar Widgets */}
-                            <div className="col-span-4 space-y-6">
-                                <GlassCard className="text-center py-10 neon-border-blue">
-                                    <span className="text-xs text-gray-500 uppercase tracking-widest">مؤقت التركيز</span>
-                                    <div className="text-6xl font-black my-4 font-mono">{formatTime(timer)}</div>
-                                    <div className="flex justify-center gap-4">
-                                        <button onClick={() => setIsRunning(!isRunning)} className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center">
-                                            <Icon name={isRunning ? "pause" : "play"} />
-                                        </button>
-                                        <button onClick={() => {setIsRunning(false); setTimer(1500)}} className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                                            <Icon name="rotate-ccw" />
-                                        </button>
-                                    </div>
-                                </GlassCard>
-
-                                <GlassCard>
-                                    <h3 className="font-bold mb-4">تتبع العادات</h3>
-                                    <Habit name="شرب الماء" progress={80} color="bg-blue-400" />
-                                    <Habit name="القراءة" progress={40} color="bg-purple-400" />
-                                    <Habit name="الرياضة" progress={100} color="bg-green-400" />
-                                </GlassCard>
-                            </div>
-                        </div>
-                    </main>
+        <div class="grid">
+            <div class="left-col">
+                <div class="card" style="margin-bottom: 25px;">
+                    <h3>المهام اليومية الذكية</h3>
+                    <div class="task-item"><div class="check" style="background: var(--neon-blue);"></div> مراجعة كود واجهة المستخدم</div>
+                    <div class="task-item"><div class="check"></div> اجتماع فريق العمل - 4 مساءً</div>
+                    <div class="task-item"><div class="check"></div> ممارسة الرياضة</div>
                 </div>
-            );
-        }
 
-        function NavButton({ icon, active, onClick }) {
-            return (
-                <button onClick={onClick} className={`p-4 rounded-2xl transition-all ${active ? 'bg-white/10 text-white border border-white/10' : 'text-gray-500 hover:text-gray-300'}`}>
-                    <Icon name={icon} size={24} />
-                </button>
-            );
-        }
-
-        function TaskItem({ text, done }) {
-            return (
-                <div className="flex items-center gap-3 opacity-90 hover:opacity-100 cursor-pointer">
-                    <div className={`w-5 h-5 rounded border ${done ? 'bg-blue-500 border-blue-500' : 'border-white/20'}`}></div>
-                    <span className={`text-sm ${done ? 'line-through text-gray-500' : ''}`}>{text}</span>
+                <div class="card" style="background: linear-gradient(135deg, rgba(188, 19, 254, 0.1), transparent);">
+                    <h3>مساعد الذكاء الاصطناعي 🧠</h3>
+                    <p style="color: #ccc; font-style: italic;">"بناءً على نشاطك الأخير، أقترح عليك أخذ استراحة لمدة 5 دقائق الآن لزيادة تركيزك."</p>
+                    <button class="btn" style="background: var(--neon-purple); color: white;">تحديث الخطة</button>
                 </div>
-            );
-        }
+            </div>
 
-        function Habit({ name, progress, color }) {
-            return (
-                <div className="mb-4">
-                    <div className="flex justify-between text-xs mb-1">
-                        <span>{name}</span>
-                        <span>{progress}%</span>
+            <div class="right-col">
+                <div class="card" style="text-align: center; margin-bottom: 25px;">
+                    <p style="text-transform: uppercase; font-size: 10px; tracking-spacing: 2px;">Study Mode</p>
+                    <div class="timer-display" id="timer">25:00</div>
+                    <button class="btn" onclick="toggleTimer()" id="startBtn">ابدأ التركيز</button>
+                </div>
+
+                <div class="card">
+                    <h3>تتبع العادات</h3>
+                    <div class="habit">
+                        <span>شرب الماء</span>
+                        <div class="progress-bg"><div class="progress-fill" style="width: 70%; background: var(--neon-blue);"></div></div>
                     </div>
-                    <div className="w-full h-1 bg-white/5 rounded-full">
-                        <div className={`h-full rounded-full ${color}`} style={{ width: `${progress}%` }}></div>
+                    <div class="habit">
+                        <span>القراءة</span>
+                        <div class="progress-bg"><div class="progress-fill" style="width: 40%; background: var(--neon-purple);"></div></div>
                     </div>
                 </div>
-            );
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // منطق المؤقت البسيط
+        let timeLeft = 1500;
+        let isRunning = false;
+        let timerId;
+
+        function toggleTimer() {
+            const btn = document.getElementById('startBtn');
+            if (isRunning) {
+                clearInterval(timerId);
+                btn.innerText = "ابدأ التركيز";
+            } else {
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    if (timeLeft <= 0) clearInterval(timerId);
+                }, 1000);
+                btn.innerText = "إيقاف مؤقت";
+            }
+            isRunning = !isRunning;
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<LifeOS />);
+        function updateDisplay() {
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
     </script>
 </body>
 </html>
