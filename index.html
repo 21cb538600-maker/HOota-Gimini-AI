@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>حوتة AI - النسخة السلسة</title>
+    <title>حوتة AI - المحرك المستقل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,8 +11,8 @@
         
         :root {
             --bg-dark: #0e0e10;
-            --bg-card: #1c1c1e;
             --accent: #3b82f6;
+            --glass: rgba(255, 255, 255, 0.03);
         }
 
         body {
@@ -25,179 +25,213 @@
             overflow: hidden;
         }
 
-        /* Smooth Animations for Messages */
-        @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(15px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+            70% { transform: scale(1.02) translateY(-2px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .message-anim {
-            animation: slideUpFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation: bounceIn 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards;
         }
 
-        /* Message Styles */
         .msg-bubble {
-            max-width: 82%;
-            padding: 10px 16px;
+            max-width: 85%;
+            padding: 14px 18px;
             font-size: 0.95rem;
-            line-height: 1.6;
-            transition: all 0.2s ease;
+            line-height: 1.7;
+            border-radius: 20px;
+            position: relative;
+            transition: all 0.3s ease;
         }
 
         .ai-bubble {
-            background: transparent;
-            border-right: 2px solid var(--accent);
-            margin-right: 8px;
+            background: var(--glass);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            border-right: 4px solid var(--accent);
+            margin-right: 4px;
         }
 
         .user-bubble {
-            background-color: #2c2c2e;
-            border-radius: 20px 20px 4px 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            align-self: flex-end;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
         }
 
-        /* Enhanced Loading Animation */
         .loader-halo {
             position: relative;
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .loader-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+        .loader-core {
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
             border-radius: 50%;
-            border: 2px solid transparent;
-            border-top-color: var(--accent);
-            border-left-color: #8b5cf6;
-            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            box-shadow: 0 0 15px var(--accent);
+            animation: pulse-core 1s infinite alternate;
         }
 
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        @keyframes pulse-core {
+            from { transform: scale(0.8); opacity: 0.5; }
+            to { transform: scale(1.2); opacity: 1; }
         }
 
-        .loader-bolt {
-            font-size: 1.1rem;
-            color: #fbbf24;
-            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
-            animation: pulse-bolt 0.8s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse-bolt {
-            from { transform: scale(0.9); opacity: 0.7; }
-            to { transform: scale(1.1); opacity: 1; }
-        }
-
-        /* Input Glass Effect */
-        .input-box {
-            background: rgba(28, 28, 30, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .input-container {
+            background: rgba(30, 30, 32, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 30px;
-            transition: border-color 0.3s ease;
         }
 
-        .input-box:focus-within {
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #2a2a2c; border-radius: 10px; }
+
+        .suggestion-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--accent);
             border-color: var(--accent);
+            transform: translateY(-2px);
         }
-
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="hidden md:flex flex-col w-64 bg-[#18181b] border-l border-white/5 p-4 transition-all duration-300">
-        <div class="flex items-center gap-3 mb-10 px-2">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i class="fas fa-h text-white"></i>
+    <aside id="sidebar" class="hidden md:flex flex-col w-72 bg-[#121214] border-l border-white/5 p-5 shrink-0">
+        <div class="flex items-center gap-3 mb-12">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-fish-bubble text-white text-xl"></i>
             </div>
-            <span class="font-bold text-lg tracking-wide">Hoota <span class="text-blue-500">AI</span></span>
+            <div class="flex flex-col">
+                <span class="font-bold text-lg leading-none">حوتة <span class="text-blue-500">AI</span></span>
+                <span class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">المحرك المستقل</span>
+            </div>
         </div>
 
-        <button onclick="window.location.reload()" class="w-full py-3 mb-6 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2">
-            <i class="fas fa-plus-circle"></i> دردشة جديدة
+        <button onclick="clearChat()" class="w-full py-3.5 mb-8 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-3">
+            <i class="fas fa-sparkles"></i> جلسة إبداع جديدة
         </button>
 
-        <div class="flex-1 overflow-y-auto custom-scroll">
-            <div id="history-list" class="space-y-2 px-1">
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4">الجلسات الأخيرة</p>
-                <div class="text-[11px] text-gray-600 italic px-2">لا توجد سجلات حالية</div>
+        <div class="flex-1 overflow-y-auto custom-scroll space-y-6">
+            <div>
+                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-4 px-2">اقتراحات المحرك</p>
+                <div class="flex flex-wrap gap-2">
+                    <div onclick="quickAsk('أعطني فكرة لمشروع تقني')" class="suggestion-chip">💡 فكرة مشروع</div>
+                    <div onclick="quickAsk('اكتب لي نصيحة لليوم')" class="suggestion-chip">🌟 نصيحة اليوم</div>
+                    <div onclick="quickAsk('لغز رياضي سريع')" class="suggestion-chip">🧩 لغز</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-auto pt-6 border-t border-white/5">
+            <div class="bg-blue-500/5 p-3 rounded-xl border border-blue-500/10">
+                <p class="text-[10px] text-blue-400 font-bold mb-1"><i class="fas fa-shield-check ml-1"></i> وضع الأمان الكامل</p>
+                <p class="text-[9px] text-gray-500 leading-relaxed">يعمل هذا المحرك محلياً 100% ولا يحتاج لاتصال خارجي أو مفاتيح.</p>
             </div>
         </div>
     </aside>
 
-    <!-- Content -->
+    <!-- Main Content -->
     <main class="flex-1 flex flex-col min-w-0 relative">
-        <header class="h-14 flex items-center justify-between px-6 border-b border-white/5">
+        <header class="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-[#0e0e10]/90 backdrop-blur-md z-10">
             <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="md:hidden p-2 text-gray-400"><i class="fas fa-bars"></i></button>
-                <h1 class="font-semibold text-sm text-gray-300">حوتة AI <span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">v3.1</span></h1>
+                <button onclick="toggleSidebar()" class="md:hidden p-2 text-gray-400 hover:bg-white/5 rounded-lg"><i class="fas fa-bars-staggered"></i></button>
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <h1 class="font-bold text-sm text-gray-200">الذكاء المحلي: حوتة</h1>
+                </div>
             </div>
-            <div class="flex items-center gap-4">
-                <i class="fas fa-bolt text-xs text-yellow-500 animate-pulse"></i>
-                <div class="w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
-                    <i class="fas fa-robot text-blue-500 text-xs"></i>
+            <div class="flex items-center gap-3">
+                <span class="hidden sm:block text-[10px] text-gray-500 font-mono">OFFLINE_ACTIVE_v4</span>
+                <div class="w-9 h-9 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
+                    <i class="fas fa-microchip text-blue-500 text-xs"></i>
                 </div>
             </div>
         </header>
 
-        <!-- Messages -->
-        <div id="chat-stream" class="flex-1 overflow-y-auto px-4 md:px-32 py-10 space-y-6 custom-scroll">
+        <!-- Chat History -->
+        <div id="chat-stream" class="flex-1 overflow-y-auto px-4 md:px-24 lg:px-48 py-10 space-y-8 custom-scroll">
             <div id="welcome-msg" class="max-w-2xl mx-auto text-center py-20">
-                <div class="w-20 h-20 bg-blue-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-comment-dots text-3xl text-blue-500"></i>
+                <div class="relative w-28 h-28 mx-auto mb-10">
+                    <div class="absolute inset-0 bg-blue-600 blur-3xl opacity-20 animate-pulse"></div>
+                    <div class="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-[2.5rem] w-full h-full flex items-center justify-center border border-white/10">
+                        <i class="fas fa-whale text-5xl text-blue-500"></i>
+                    </div>
                 </div>
-                <h2 class="text-2xl md:text-3xl font-bold mb-4">مرحباً بك في عالم حوتة</h2>
-                <p class="text-gray-500 text-sm md:text-base">أنا رفيقك الذكي، جاهز للإجابة على تساؤلاتك بكل سلاسة وسرعة.</p>
+                <h2 class="text-3xl md:text-4xl font-black mb-6 tracking-tight">أنا حوتة AI المحلي</h2>
+                <p class="text-gray-400 text-base md:text-lg max-w-md mx-auto leading-relaxed">
+                    لقد تم تفعيل نظام "التوليد الذاتي". يمكنني الآن مساعدتك في توليد الأفكار والإجابة بدون أي مفاتيح خارجية.
+                </p>
             </div>
         </div>
 
-        <!-- Animated Loader -->
-        <div id="loader" class="hidden px-4 md:px-32 py-4">
+        <!-- Loader -->
+        <div id="loader" class="hidden px-4 md:px-24 lg:px-48 py-6">
             <div class="flex items-center gap-4">
                 <div class="loader-halo">
-                    <div class="loader-ring"></div>
-                    <i class="fas fa-bolt loader-bolt"></i>
+                    <div class="loader-core"></div>
                 </div>
-                <span class="text-[11px] text-blue-400 font-bold tracking-[0.2em] uppercase">Neural Syncing...</span>
+                <span class="text-[10px] text-blue-400 font-bold tracking-[0.3em] uppercase">توليد أفكار...</span>
             </div>
         </div>
 
-        <!-- Footer Input -->
-        <footer class="p-4 md:p-8 bg-gradient-to-t from-black/20 to-transparent">
-            <div class="max-w-3xl mx-auto relative">
-                <div class="input-box flex items-center p-2 shadow-2xl">
-                    <button class="p-3 text-gray-500 hover:text-white transition-colors"><i class="fas fa-paperclip"></i></button>
-                    <textarea id="msg-input" rows="1" placeholder="اسأل حوتة عن أي شيء..." class="flex-1 bg-transparent border-none outline-none py-3 px-2 text-base text-right resize-none placeholder:text-gray-600"></textarea>
-                    <button id="send-btn" class="w-12 h-12 bg-blue-600 hover:bg-blue-500 text-white rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg disabled:opacity-30">
-                        <i class="fas fa-paper-plane transform rotate-180"></i>
+        <!-- Input Section -->
+        <footer class="p-6 md:p-10">
+            <div class="max-w-4xl mx-auto">
+                <div class="input-container flex items-end p-2.5 shadow-2xl">
+                    <button class="p-3 text-gray-500 hover:text-white transition-colors"><i class="fas fa-microphone"></i></button>
+                    <textarea id="msg-input" rows="1" placeholder="اطلب فكرة، لغزاً، أو نصيحة..." class="flex-1 bg-transparent border-none outline-none py-3 px-3 text-base md:text-lg text-right resize-none placeholder:text-gray-600"></textarea>
+                    <button id="send-btn" class="w-12 h-12 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-blue-600/20">
+                        <i class="fas fa-paper-plane-top text-lg"></i>
                     </button>
                 </div>
-                <p class="text-[9px] text-center text-gray-700 mt-4 uppercase tracking-widest">Hoota AI Engine • Optimized for Speed</p>
             </div>
         </footer>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hoota-smooth-final';
-        const apiKey = "";
+    <script>
+        /** قاعدة المعرفة المحلية - محرك حوتة المستقل **/
+        const LOCAL_BRAIN = {
+            greetings: ["أهلاً بك! أنا حوتة في وضع التشغيل الذاتي. كيف أساعدك اليوم؟", "مرحباً! لقد قمت بتشغيل المحرك المحلي، أنا جاهز للأوامر."],
+            ideas: [
+                "فكرة مشروع: تطبيق 'مبادل' لتبادل الكتب المستعملة في حيك السكني باستخدام الموقع الجغرافي.",
+                "فكرة إبداعية: ماذا لو كان هناك جهاز يترجم مشاعر الحيوانات الأليفة إلى ألوان تظهر على طوقها؟",
+                "فكرة تقنية: منصة تعتمد على الذكاء الاصطناعي لمساعدة الطلاب في تحويل المحاضرات الصوتية إلى خرائط ذهنية فورية.",
+                "فكرة محتوى: سلسلة فيديوهات قصيرة تشرح 'تاريخ الأشياء العادية' التي نستخدمها يومياً ولا نعرف أصلها."
+            ],
+            tips: [
+                "نصيحة اليوم: ابدأ يومك بأصعب مهمة (Frog Eating)، فبقية اليوم سيكون أسهل بكثير.",
+                "نصيحة تقنية: لا تعتمد على ذاكرتك أبداً، استخدم نظام تدوين ملاحظات رقمي (مثل Notion) لفرز أفكارك.",
+                "نصيحة صحية: قاعدة 20-20-20؛ كل 20 دقيقة أمام الشاشة، انظر لشيء يبعد 20 قدماً لمدة 20 ثانية."
+            ],
+            riddles: [
+                "لغز: ما هو الشيء الذي له أسنان ولا يعض؟ (الجواب: المشط)",
+                "لغز: شيء تملكه أنت، ولكن يستخدمه الآخرون أكثر منك؟ (الجواب: اسمك)",
+                "لغز: أين تجد المدن، والبيوت، والشوارع ولكن بدون ناس؟ (الجواب: الخريطة)"
+            ],
+            fallback: [
+                "هذا مذهل! كوني أعمل في الوضع المحلي، أرى أن فكرتك تحمل إمكانيات كبيرة.",
+                "سؤال مثير للاهتمام. في عالم الأفكار، لا يوجد مستحيل. هل تريدني أن أتعمق أكثر في هذا الجانب؟",
+                "أنا أفهمك تماماً. دعنا نحاول صياغة هذه الفكرة بطريقة إبداعية أخرى."
+            ]
+        };
 
         const stream = document.getElementById('chat-stream');
         const welcome = document.getElementById('welcome-msg');
@@ -205,40 +239,22 @@
         const sendBtn = document.getElementById('send-btn');
         const loader = document.getElementById('loader');
 
-        let user = null;
+        let chatHistory = JSON.parse(localStorage.getItem('hoota_local_v4') || '[]');
 
-        // Auth
-        (async () => {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          } else {
-            await signInAnonymously(auth);
-          }
-        })();
-
-        onAuthStateChanged(auth, (u) => {
-            if (u) { user = u; listen(); }
-        });
-
-        function listen() {
-            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'chats'));
-            onSnapshot(q, (snap) => {
-                const msgs = snap.docs.map(d => d.data()).sort((a,b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
-                draw(msgs);
-            });
+        function init() {
+            render(chatHistory);
         }
 
-        function draw(msgs) {
+        function render(msgs) {
             if (msgs.length > 0) welcome.classList.add('hidden');
             stream.innerHTML = msgs.length === 0 ? welcome.outerHTML : '';
-            
             msgs.forEach(m => {
                 const isAi = m.role === 'ai';
                 const div = document.createElement('div');
                 div.className = `flex ${isAi ? 'justify-start' : 'justify-end'} message-anim`;
                 div.innerHTML = `
                     <div class="msg-bubble ${isAi ? 'ai-bubble' : 'user-bubble'}">
-                        ${isAi ? '<div class="text-[10px] font-bold text-blue-500 mb-1">حوتة AI</div>' : ''}
+                        ${isAi ? '<div class="text-[10px] font-bold text-blue-400 mb-1">حوتة المحلي</div>' : ''}
                         <div class="whitespace-pre-wrap">${m.text}</div>
                     </div>
                 `;
@@ -247,56 +263,68 @@
             stream.scrollTop = stream.scrollHeight;
         }
 
-        async function fetchAI(prompt) {
-            const system = "أنت 'حوتة آي' (Hoota AI). لا ترحب بالمستخدم في كل رسالة. ترحب فقط إذا بادر المستخدم بالتحية (مثل: سلام، مرحبا، هاي) أو سألك عن حالك أو هويتك. ردودك سريعة، دقيقة، ومختصرة إلا إذا طلب المستخدم التفصيل.";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        // محرك التوليد المنطقي (Local Logic Engine)
+        function generateLocalResponse(prompt) {
+            const p = prompt.toLowerCase();
             
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        systemInstruction: { parts: [{ text: system }] }
-                    })
-                });
-                const data = await res.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || "اعتذر، حدث خطأ تقني.";
-            } catch (e) {
-                return "خطأ في الاتصال بالمحرك.";
-            }
+            if (p.includes("مرحبا") || p.includes("سلام") || p.includes("هاي")) 
+                return LOCAL_BRAIN.greetings[Math.floor(Math.random() * LOCAL_BRAIN.greetings.length)];
+            
+            if (p.includes("فكرة") || p.includes("مشروع") || p.includes("تفكير"))
+                return LOCAL_BRAIN.ideas[Math.floor(Math.random() * LOCAL_BRAIN.ideas.length)];
+            
+            if (p.includes("نصيحة") || p.includes("طورني"))
+                return LOCAL_BRAIN.tips[Math.floor(Math.random() * LOCAL_BRAIN.tips.length)];
+            
+            if (p.includes("لغز") || p.includes("تحدي"))
+                return LOCAL_BRAIN.riddles[Math.floor(Math.random() * LOCAL_BRAIN.riddles.length)];
+
+            return LOCAL_BRAIN.fallback[Math.floor(Math.random() * LOCAL_BRAIN.fallback.length)];
         }
 
         async function handleSend() {
             const text = input.value.trim();
-            if (!text || !user || sendBtn.disabled) return;
+            if (!text || sendBtn.disabled) return;
 
             input.value = '';
             input.style.height = 'auto';
             sendBtn.disabled = true;
             loader.classList.remove('hidden');
-            stream.scrollTop = stream.scrollHeight;
+            
+            // إضافة رسالة المستخدم
+            chatHistory.push({ role: 'user', text });
+            render(chatHistory);
 
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats'), {
-                    text, role: 'user', uid: user.uid, timestamp: serverTimestamp()
-                });
-
-                const reply = await fetchAI(text);
-
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'chats'), {
-                    text: reply, role: 'ai', timestamp: serverTimestamp()
-                });
-            } finally {
+            // محاكاة وقت التفكير (سلس جداً)
+            setTimeout(() => {
+                const aiReply = generateLocalResponse(text);
+                chatHistory.push({ role: 'ai', text: aiReply });
+                localStorage.setItem('hoota_local_v4', JSON.stringify(chatHistory));
+                render(chatHistory);
                 sendBtn.disabled = false;
                 loader.classList.add('hidden');
-            }
+            }, 800);
         }
 
-        sendBtn.onclick = handleSend;
-        input.onkeydown = (e) => (e.key === 'Enter' && !e.shiftKey) ? (e.preventDefault(), handleSend()) : null;
-        input.oninput = function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; };
+        window.quickAsk = (q) => {
+            input.value = q;
+            handleSend();
+        };
+
+        window.clearChat = () => {
+            if(confirm("مسح السجل الإبداعي؟")) {
+                localStorage.removeItem('hoota_local_v4');
+                chatHistory = [];
+                render([]);
+            }
+        };
+
         window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('hidden'); };
+        input.oninput = function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; };
+        input.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
+        sendBtn.onclick = handleSend;
+
+        init();
     </script>
 </body>
 </html>
